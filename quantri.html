@@ -26,7 +26,6 @@
                 
                 const tr = document.createElement("tr");
                 tr.innerHTML = `
-                    <td><strong>${data.ho_ten}</strong></td>
                     <td>${data.mssv}</td>
                     <td>${data.lop}</td>
                     <td>${data.sdt}</td>
@@ -44,7 +43,7 @@
                                 <option value="Không duyệt" ${data.trang_thai === 'Không duyệt' ? 'selected' : ''}>Không duyệt</option>
                             </select>
                             <input type="text" class="reason-input" data-id="${docId}" placeholder="Nhập lý do..." value="${data.ly_do || ''}">
-                            <button class="save-eval-btn" data-id="${docId}" data-mssv="${data.mssv}">Lưu kết quả</button>
+                            <button class="save-eval-btn" data-id="${docId}">Lưu kết quả</button>
                         </div>
                     </td>
                 `;
@@ -54,34 +53,18 @@
             document.querySelectorAll('.save-eval-btn').forEach(button => {
                 button.addEventListener('click', async (e) => {
                     const id = e.target.getAttribute('data-id');
-                    const mssvGoc = e.target.getAttribute('data-mssv');
                     const row = e.target.closest('.review-box');
                     const trangThai = row.querySelector('.status-select').value;
                     const lyDo = row.querySelector('.reason-input').value;
                     
                     try {
-                        // 1. Cập nhật bảng bảo mật
+                        // Cập nhật bảng bảo mật
                         const docRef = doc(db, "HoSo_BaoMat", id);
-                        await updateDoc(docRef, { 
-                            trang_thai: trangThai, 
-                            ly_do: lyDo 
-                        });
+                        await updateDoc(docRef, { trang_thai: trangThai, ly_do: lyDo });
 
-                        // 2. Tìm dòng có cùng MSSV ở bảng công khai để cập nhật trạng thái hiển thị
-                        const congKhaiQuery = query(collection(db, "HoSo_CongKhai"));
-                        const querySnapshot = await getDocs(congKhaiQuery);
-                        
-                        querySnapshot.forEach(async (publicDoc) => {
-                            const publicData = publicDoc.data();
-                            // So khớp dựa vào 4 ký tự đầu mã số sinh viên đã ẩn
-                            if (publicData.mssv_an && mssvGoc.startsWith(publicData.mssv_an.substring(0, 4))) {
-                                const publicDocRef = doc(db, "HoSo_CongKhai", publicDoc.id);
-                                await updateDoc(publicDocRef, { 
-                                    trang_thai: trangThai, 
-                                    ly_do: lyDo 
-                                });
-                            }
-                        });
+                        // Cập nhật đúng dòng tương ứng ở bảng công khai dựa vào trùng ID
+                        const publicDocRef = doc(db, "HoSo_CongKhai", id);
+                        await updateDoc(publicDocRef, { trang_thai: trangThai, ly_do: lyDo });
 
                         alert("Đã lưu và đồng bộ thành công!");
                     } catch (error) {
