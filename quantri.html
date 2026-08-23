@@ -1,58 +1,6 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <title>Quản trị viên | Xét duyệt danh hiệu FFl</title>
-    <style>
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f4fbf5; padding: 20px; color: #2e3d32; margin: 0; }
-        .table-container { max-width: 1500px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 40px; box-shadow: 0 8px 24px rgba(0,0,0,0.06); }
-        h2 { color: #2e7d32; border-bottom: 4px solid #ffca28; padding-bottom: 8px; display: inline-block; margin-bottom: 20px; }
-        .table-responsive { width: 100%; overflow-x: auto; border-radius: 20px; border: 2px solid #e8f5e9; }
-        table { width: 100%; border-collapse: collapse; white-space: nowrap; }
-        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #e8f5e9; font-size: 14px; vertical-align: middle; }
-        th { background-color: #2e7d32; color: #fff; font-weight: bold; }
-        tr:last-child td { border-bottom: none; }
-        tr:hover td { background-color: #f4fbf5; }
-        .mini-btn { background-color: #ffca28; color: #1b5e20; padding: 6px 12px; border-radius: 20px; text-decoration: none; font-weight: bold; font-size: 12px; display: inline-block; }
-        
-        .review-box { display: flex; flex-direction: column; gap: 8px; min-width: 220px; }
-        select, input[type="text"] { padding: 8px 12px; border-radius: 20px; border: 2px solid #e8f5e9; outline: none; font-size: 13px; background: #f9fdf9; }
-        select:focus, input[type="text"]:focus { border-color: #81c784; }
-        .save-eval-btn { background-color: #2e7d32; color: #fff; border: none; padding: 6px 12px; border-radius: 20px; font-weight: bold; cursor: pointer; font-size: 12px; transition: 0.3s; }
-        .save-eval-btn:hover { background-color: #1b5e20; }
-    </style>
-</head>
-<body>
-
-    <div class="table-container">
-        <h2>Quản lý và Xét duyệt hồ sơ Khoa</h2>
-        <div class="table-responsive">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Họ tên</th>
-                        <th>MSSV</th>
-                        <th>Lớp</th>
-                        <th>SĐT</th>
-                        <th>Ngành học</th>
-                        <th>Địa chỉ</th>
-                        <th>Email</th>
-                        <th>Chức vụ</th>
-                        <th>Danh hiệu</th>
-                        <th>Minh chứng</th>
-                        <th>Tình hình xét duyệt & Lý do</th>
-                    </tr>
-                </thead>
-                <tbody id="dataList">
-                    <!-- Dữ liệu tải động -->
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <script type="module">
+<script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, query, orderBy, doc, updateDoc, where, getDocs } 
+        import { getFirestore, collection, onSnapshot, query, orderBy, doc, updateDoc, getDocs, where } 
         from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -90,24 +38,23 @@
                     <td><a href="${data.link_drive}" target="_blank" class="mini-btn">Mở tệp</a></td>
                     <td>
                         <div class="review-box">
-                            <select class="status-select" data-id="${docId}" data-mssv="${data.mssv}">
+                            <select class="status-select" data-id="${docId}">
                                 <option value="Chưa duyệt" ${data.trang_thai === 'Chưa duyệt' ? 'selected' : ''}>Chưa duyệt</option>
                                 <option value="Đã duyệt" ${data.trang_thai === 'Đã duyệt' ? 'selected' : ''}>Đã duyệt</option>
                                 <option value="Không duyệt" ${data.trang_thai === 'Không duyệt' ? 'selected' : ''}>Không duyệt</option>
                             </select>
-                            <input type="text" class="reason-input" data-id="${docId}" placeholder="Nhập lý do (nếu không duyệt)..." value="${data.ly_do || ''}">
-                            <button class="save-eval-btn" data-id="${docId}" data-name="${data.ho_ten}">Lưu kết quả</button>
+                            <input type="text" class="reason-input" data-id="${docId}" placeholder="Nhập lý do..." value="${data.ly_do || ''}">
+                            <button class="save-eval-btn" data-id="${docId}" data-mssv="${data.mssv}">Lưu kết quả</button>
                         </div>
                     </td>
                 `;
                 dataList.appendChild(tr);
             });
 
-            // Lắng nghe sự kiện lưu kết quả xét duyệt
             document.querySelectorAll('.save-eval-btn').forEach(button => {
                 button.addEventListener('click', async (e) => {
                     const id = e.target.getAttribute('data-id');
-                    const hoTen = e.target.getAttribute('data-name');
+                    const mssvGoc = e.target.getAttribute('data-mssv');
                     const row = e.target.closest('.review-box');
                     const trangThai = row.querySelector('.status-select').value;
                     const lyDo = row.querySelector('.reason-input').value;
@@ -120,19 +67,23 @@
                             ly_do: lyDo 
                         });
 
-                        // 2. Đồng bộ sang bảng công khai để sinh viên xem
-                        const congKhaiQuery = query(collection(db, "HoSo_CongKhai"), where("ho_ten", "==", hoTen));
+                        // 2. Tìm dòng có cùng MSSV ở bảng công khai để cập nhật trạng thái hiển thị
+                        const congKhaiQuery = query(collection(db, "HoSo_CongKhai"));
                         const querySnapshot = await getDocs(congKhaiQuery);
                         
                         querySnapshot.forEach(async (publicDoc) => {
-                            const publicDocRef = doc(db, "HoSo_CongKhai", publicDoc.id);
-                            await updateDoc(publicDocRef, { 
-                                trang_thai: trangThai, 
-                                ly_do: lyDo 
-                            });
+                            const publicData = publicDoc.data();
+                            // So khớp dựa vào 4 ký tự đầu mã số sinh viên đã ẩn
+                            if (publicData.mssv_an && mssvGoc.startsWith(publicData.mssv_an.substring(0, 4))) {
+                                const publicDocRef = doc(db, "HoSo_CongKhai", publicDoc.id);
+                                await updateDoc(publicDocRef, { 
+                                    trang_thai: trangThai, 
+                                    ly_do: lyDo 
+                                });
+                            }
                         });
 
-                        alert("Đã lưu và cập nhật tiến độ cho sinh viên!");
+                        alert("Đã lưu và đồng bộ thành công!");
                     } catch (error) {
                         console.error("Lỗi cập nhật: ", error);
                         alert("Không thể lưu. Vui lòng kiểm tra lại kết nối.");
@@ -141,5 +92,3 @@
             });
         });
     </script>
-</body>
-</html>
