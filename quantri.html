@@ -1,6 +1,60 @@
-<script type="module">
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Hồ sơ | FFl Admin</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4fbf5; color: #2e3d32; padding: 20px; }
+        .container { max-width: 1400px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 40px; box-shadow: 0 8px 24px rgba(0,0,0,0.06); }
+        h2 { color: #2e7d32; margin-bottom: 25px; border-bottom: 4px solid #ffca28; display: inline-block; padding-bottom: 8px; }
+        .table-responsive { width: 100%; overflow-x: auto; border-radius: 20px; border: 2px solid #e8f5e9; }
+        table { width: 100%; border-collapse: collapse; white-space: nowrap; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #e8f5e9; font-size: 14px; }
+        th { background-color: #2e7d32; color: #fff; font-weight: bold; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background-color: #f4fbf5; }
+        .mini-btn { padding: 6px 14px; background: #ffca28; color: #1b5e20; text-decoration: none; border-radius: 20px; font-weight: bold; font-size: 12px; display: inline-block; }
+        .mini-btn:hover { background: #ffb300; }
+        .review-box { display: flex; gap: 10px; align-items: center; }
+        select, input[type="text"] { padding: 8px 12px; border-radius: 20px; border: 2px solid #e8f5e9; outline: none; font-size: 13px; background: #f9fdf9; }
+        select:focus, input[type="text"]:focus { border-color: #81c784; }
+        .save-eval-btn { padding: 8px 16px; background: #2e7d32; color: white; border: none; border-radius: 20px; font-weight: bold; cursor: pointer; font-size: 13px; }
+        .save-eval-btn:hover { background: #1b5e20; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Quản lý và Xét duyệt hồ sơ Khoa</h2>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Họ tên</th>
+                        <th>MSSV</th>
+                        <th>Lớp</th>
+                        <th>SĐT</th>
+                        <th>Ngành học</th>
+                        <th>Địa chỉ</th>
+                        <th>Email</th>
+                        <th>Chức vụ</th>
+                        <th>Danh hiệu</th>
+                        <th>Minh chứng</th>
+                        <th>Tình hình xét duyệt & Lý do</th>
+                    </tr>
+                </thead>
+                <tbody id="dataList">
+                    <!-- Dữ liệu tự động đổ về từ hệ thống -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, query, orderBy, doc, updateDoc, getDocs, where } 
+        import { getFirestore, collection, onSnapshot, query, orderBy, doc, updateDoc } 
         from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -26,6 +80,7 @@
                 
                 const tr = document.createElement("tr");
                 tr.innerHTML = `
+                    <td><strong>${data.ho_ten}</strong></td>
                     <td>${data.mssv}</td>
                     <td>${data.lop}</td>
                     <td>${data.sdt}</td>
@@ -58,13 +113,11 @@
                     const lyDo = row.querySelector('.reason-input').value;
                     
                     try {
-                        // Cập nhật bảng bảo mật
-                        const docRef = doc(db, "HoSo_BaoMat", id);
-                        await updateDoc(docRef, { trang_thai: trangThai, ly_do: lyDo });
+                        const docRefBaoMat = doc(db, "HoSo_BaoMat", id);
+                        await updateDoc(docRefBaoMat, { trang_thai: trangThai, ly_do: lyDo });
 
-                        // Cập nhật đúng dòng tương ứng ở bảng công khai dựa vào trùng ID
-                        const publicDocRef = doc(db, "HoSo_CongKhai", id);
-                        await updateDoc(publicDocRef, { trang_thai: trangThai, ly_do: lyDo });
+                        const docRefCongKhai = doc(db, "HoSo_CongKhai", id);
+                        await updateDoc(docRefCongKhai, { trang_thai: trangThai, ly_do: lyDo });
 
                         alert("Đã lưu và đồng bộ thành công!");
                     } catch (error) {
@@ -75,3 +128,5 @@
             });
         });
     </script>
+</body>
+</html>
