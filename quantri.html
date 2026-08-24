@@ -57,7 +57,6 @@
         .filter-btn { flex: 1; padding: 12px 20px; background: #f0fdf4; color: #166534; border: 2px solid #bbf7d0; border-radius: 20px; font-weight: 900; cursor: pointer; transition: all 0.3s; text-align: center; }
         .filter-btn.active { background: linear-gradient(135deg, #15803d 0%, #ca8a04 100%); color: #fff; border-color: transparent; box-shadow: 0 4px 15px rgba(22, 101, 52, 0.25); }
 
-        /* Badge nhãn trạng thái Check-in thông minh */
         .badge-dangky { background-color: #dcfce7; color: #166534; padding: 5px 12px; border-radius: 15px; font-weight: 800; font-size: 12px; border: 1px solid #bbf7d0; display: inline-block; }
         .badge-vanglai { background-color: #fef9c3; color: #854d0e; padding: 5px 12px; border-radius: 15px; font-weight: 800; font-size: 12px; border: 1px solid #fef08a; display: inline-block; }
     </style>
@@ -115,7 +114,7 @@
             </div>
         </div>
 
-        <!-- TAB 3: CHECK-IN ĐIỂM DANH (CÓ TÍNH TOÁN VÃNG LAI) -->
+        <!-- TAB 3: CHECK-IN ĐIỂM DANH -->
         <div id="tabDiemDanh" class="tab-content">
             <h2>Check-in Điểm danh sự kiện trực tiếp</h2>
             
@@ -274,21 +273,22 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Lắng nghe danh sách sinh viên đã đăng ký sự kiện
         const adminListDangKySK = document.getElementById("adminListDangKySK");
         onSnapshot(query(collection(db, "DangKy_SuKien"), orderBy("thoi_gian_dk", "desc")), (snapshot) => {
             adminListDangKySK.innerHTML = "";
             let stt = 1;
             snapshot.forEach((docSnap) => {
                 const data = docSnap.data();
-                let thoiGianStr = data.thoi_gian_dk ? data.thoi_gian_dk.toDate().toLocaleTimeString('vi-VN') + " - " + data.thoi_gian_dk.toDate().toLocaleDateString('vi-VN') : "";
+                let thoiGianStr = "";
+                if (data.thoi_gian_dk && typeof data.thoi_gian_dk.toDate === 'function') {
+                    thoiGianStr = data.thoi_gian_dk.toDate().toLocaleTimeString('vi-VN') + " - " + data.thoi_gian_dk.toDate().toLocaleDateString('vi-VN');
+                }
                 const tr = document.createElement("tr");
                 tr.innerHTML = `<td><strong>${stt++}</strong></td><td><strong>${data.mssv}</strong></td><td>${data.ho_ten}</td><td>${data.lop}</td><td><span class="status-tag status-da-duyet">${data.su_kien}</span></td><td>${thoiGianStr}</td>`;
                 adminListDangKySK.appendChild(tr);
             });
         });
 
-        // Xử lý Check-in thông minh (Tự tính toán: Đã đăng ký trước vs Khách vãng lai)
         const adminDiemDanhForm = document.getElementById("adminDiemDanhForm");
         adminDiemDanhForm.addEventListener("submit", async (e) => {
             e.preventDefault();
@@ -301,14 +301,12 @@
             }
 
             try {
-                // Kiểm tra xem đã check-in chưa
                 const checkQ = query(collection(db, "DiemDanh_SuKien"), where("mssv", "==", mssvInput), where("su_kien", "==", suKienName));
                 if (!(await getDocs(checkQ)).empty) {
                     alert("Sinh viên này đã check-in sự kiện này rồi!");
                     return;
                 }
 
-                // Kiểm tra xem sinh viên có đăng ký trước đó hay không
                 const regQ = query(collection(db, "DangKy_SuKien"), where("mssv", "==", mssvInput), where("su_kien", "==", suKienName));
                 const regSnap = await getDocs(regQ);
 
@@ -339,7 +337,6 @@
             }
         });
 
-        // Lắng nghe danh sách check-in thực tế hiển thị trên bảng quản trị
         const adminListCheckinSK = document.getElementById("adminListCheckinSK");
         onSnapshot(query(collection(db, "DiemDanh_SuKien"), orderBy("thoi_gian", "desc")), (snapshot) => {
             adminListCheckinSK.innerHTML = "";
@@ -347,9 +344,11 @@
             snapshot.forEach((docSnap) => {
                 const data = docSnap.data();
                 const docId = docSnap.id;
-                let thoiGianStr = data.thoi_gian ? data.thoi_gian.toDate().toLocaleTimeString('vi-VN') + " - " + data.thoi_gian.toDate().toLocaleDateString('vi-VN') : "";
+                let thoiGianStr = "";
+                if (data.thoi_gian && typeof data.thoi_gian.toDate === 'function') {
+                    thoiGianStr = data.thoi_gian.toDate().toLocaleTimeString('vi-VN') + " - " + data.thoi_gian.toDate().toLocaleDateString('vi-VN');
+                }
                 
-                // Tính toán nhãn hiển thị badge trực quan
                 let badgeHTML = `<span class="badge-dangky">✓ Đã đăng ký trước</span>`;
                 if (data.trang_thai && data.trang_thai.includes("Vãng lai")) {
                     badgeHTML = `<span class="badge-vanglai">⚡ Vãng lai (Điểm danh trực tiếp)</span>`;
