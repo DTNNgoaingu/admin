@@ -112,7 +112,6 @@
             <h2>Quản lý Sự kiện & Điểm danh</h2>
             <p style="margin-bottom: 20px; color: #4b5563; font-weight: 700;">Chọn Học kỳ để quản lý các chương trình:</p>
             
-            <!-- Mục chọn học kỳ đồng bộ với web sinh viên -->
             <div class="hocky-tabs">
                 <button class="hk-btn active" onclick="chuyenHocKyAdmin('hk1', this)">Học kỳ 1 (2026 - 2027)</button>
                 <button class="hk-btn" onclick="chuyenHocKyAdmin('hk2', this)">Học kỳ 2 (2026 - 2027)</button>
@@ -155,13 +154,16 @@
     </div>
 
     <script>
+        // PHÂN QUYỀN TÀI KHOẢN CHI TIẾT
         const PHAN_QUYEN = {
-            "admin123": { ten: "Đoàn Khoa Ngoại ngữ", quyenHoSo: true },
-            "mod2026": { ten: "CLB MOD", quyenHoSo: false },
-            "ec2026": { ten: "CLB English Club (EC)", quyenHoSo: false },
-            "fflc2026": { ten: "CLB FFLC", quyenHoSo: false },
-            "media2026": { ten: "CLB Media", quyenHoSo: false },
-            "fmcc2026": { ten: "CLB FMCC", quyenHoSo: false }
+            "bt2026": { ten: "Bí thư Đoàn Khoa", quyenHoSo: true, quyenXoa: true, suKienPhuTrach: "ALL" },
+            "lcht2026": { ten: "Liên Chi hội Trưởng", quyenHoSo: true, quyenXoa: true, suKienPhuTrach: "ALL" },
+            "admin123": { ten: "Quản trị viên (Admin)", quyenHoSo: true, quyenXoa: false, suKienPhuTrach: "ALL" },
+            "mod2026": { ten: "CLB MOD", quyenHoSo: false, quyenXoa: false, suKienPhuTrach: ["Workshop Làm đồ dân gian"] },
+            "ec2026": { ten: "CLB English Club (EC)", quyenHoSo: false, quyenXoa: false, suKienPhuTrach: ["Ngày hội CLB khoa NN"] },
+            "fflc2026": { ten: "CLB FFLC", quyenHoSo: false, quyenXoa: false, suKienPhuTrach: ["Lễ đón TSV K26"] },
+            "media2026": { ten: "CLB Media", quyenHoSo: false, quyenXoa: false, suKienPhuTrach: ["Hội thao truyền thống"] },
+            "fmcc2026": { ten: "CLB FMCC", quyenHoSo: false, quyenXoa: false, suKienPhuTrach: ["Cuộc thi Hùng biện tiếng Anh"] }
         };
 
         let currentRole = null;
@@ -169,12 +171,39 @@
         let globalAdminSnapshot = null;
         let currentHkSelected = "hk1";
 
-        // Danh sách sự kiện cấu hình theo học kỳ
         const SU_KIEN_THEO_HK = {
             "hk1": ["Workshop Làm đồ dân gian", "Ngày hội CLB khoa NN", "Lễ đón TSV K26"],
             "hk2": ["Hội thao truyền thống", "Cuộc thi Hùng biện tiếng Anh"],
             "hk3": ["Tổng kết chiến dịch Mùa hè xanh", "Đêm hội văn nghệ khoa"]
         };
+
+        function capNhatDropdownSuKien() {
+            const selectSk = document.getElementById("chonHoatDong");
+            selectSk.innerHTML = `<option value="" disabled selected>-- Chọn sự kiện check-in --</option>`;
+            
+            let danhSachHienThi = [];
+            if (currentRole && currentRole.suKienPhuTrach !== "ALL") {
+                // Nếu là CLB, chỉ nạp những sự kiện được phân quyền
+                danhSachHienThi = currentRole.suKienPhuTrach;
+            } else {
+                // Nếu là Bí thư, LCHT hoặc admin123, nạp toàn bộ sự kiện của học kỳ đang chọn
+                danhSachHienThi = SU_KIEN_THEO_HK[currentHkSelected] || [];
+            }
+
+            danhSachHienThi.forEach(sk => {
+                const opt = document.createElement("option");
+                opt.value = sk;
+                opt.innerText = sk;
+                selectSk.appendChild(opt);
+            });
+
+            if (danhSachHienThi.length > 0) {
+                selectSk.value = danhSachHienThi[0];
+                document.getElementById("tieuDeBangQuanLy").innerText = `Danh sách: ${danhSachHienThi[0]}`;
+            } else {
+                document.getElementById("tieuDeBangQuanLy").innerText = `Danh sách: (Không có sự kiện được phân quyền ở học kỳ này)`;
+            }
+        }
 
         function kiemTraMatKhau() {
             const val = document.getElementById("adminPassword").value.trim();
@@ -188,6 +217,8 @@
                     document.getElementById("tabHeaderNav").style.display = "none";
                     chuyenTab('tabQuanLySK');
                 }
+                capNhatDropdownSuKien();
+                if (typeof window.triggerRender === 'function') window.triggerRender();
             } else {
                 alert("Mật khẩu không chính xác!");
                 document.getElementById("adminPassword").value = "";
@@ -210,21 +241,7 @@
             document.querySelectorAll('.hk-btn').forEach(btn => btn.classList.remove('active'));
             btnElement.classList.add('active');
 
-            // Cập nhật lại dropdown danh sách sự kiện phù hợp với học kỳ
-            const selectSk = document.getElementById("chonHoatDong");
-            selectSk.innerHTML = `<option value="" disabled selected>-- Chọn sự kiện check-in --</option>`;
-            
-            if (SU_KIEN_THEO_HK[hkId]) {
-                SU_KIEN_THEO_HK[hkId].forEach(sk => {
-                    const opt = document.createElement("option");
-                    opt.value = sk;
-                    opt.innerText = sk;
-                    selectSk.appendChild(opt);
-                });
-                // Tự động chọn sự kiện đầu tiên của học kỳ
-                selectSk.value = SU_KIEN_THEO_HK[hkId][0];
-                document.getElementById("tieuDeBangQuanLy").innerText = `Danh sách: ${SU_KIEN_THEO_HK[hkId][0]}`;
-            }
+            capNhatDropdownSuKien();
             if (typeof window.triggerRender === 'function') window.triggerRender();
         }
 
@@ -326,7 +343,7 @@
 
         let regDataList = [];
         let checkinDataList = [];
-        let currentRenderList = []; // Lưu lại danh sách hiện tại để phục vụ tính năng xuất file
+        let currentRenderList = [];
 
         function renderTongHopTable() {
             const tableBody = document.getElementById("adminListTongHopSK");
@@ -338,7 +355,6 @@
             const selectedSk = document.getElementById("chonHoatDong").value;
             if (!selectedSk) return;
 
-            // Lọc dữ liệu theo đúng sự kiện đang chọn trên giao diện
             const hkRegs = regDataList.filter(item => item.su_kien === selectedSk);
             const hkCheckins = checkinDataList.filter(item => item.su_kien === selectedSk);
 
@@ -387,10 +403,12 @@
                 let thaoTacHTML = "---";
                 let trangThaiText = "";
 
+                const duocPhepXoa = currentRole && currentRole.quyenXoa === true;
+
                 if (data.hasReg && data.checkinItem) {
                     trangThaiHTML = `<span class="badge-dangky">✓ Đã ĐK & Đã đi</span>`;
                     trangThaiText = "Đã đăng ký & Đã tham gia";
-                    thaoTacHTML = `<button class="delete-btn" onclick="xoaCheckinSK('${data.checkinItem.id}')">Xóa</button>`;
+                    thaoTacHTML = duocPhepXoa ? `<button class="delete-btn" onclick="xoaCheckinSK('${data.checkinItem.id}')">Xóa</button>` : "---";
                 } else if (data.hasReg && !data.checkinItem) {
                     trangThaiHTML = `<span class="badge-chuadi">⏳ Đã ĐK (Chưa đi)</span>`;
                     trangThaiText = "Đã đăng ký (Chưa đi)";
@@ -398,10 +416,9 @@
                 } else if (!data.hasReg && data.checkinItem) {
                     trangThaiHTML = `<span class="badge-vanglai">⚡ Khách vãng lai</span>`;
                     trangThaiText = "Khách vãng lai";
-                    thaoTacHTML = `<button class="delete-btn" onclick="xoaCheckinSK('${data.checkinItem.id}')">Xóa</button>`;
+                    thaoTacHTML = duocPhepXoa ? `<button class="delete-btn" onclick="xoaCheckinSK('${data.checkinItem.id}')">Xóa</button>` : "---";
                 }
 
-                // Lưu lại dòng dữ liệu nếu sinh viên có tham gia thực tế (phục vụ nút tải file)
                 if (data.checkinItem) {
                     currentRenderList.push({
                         stt: stt,
@@ -430,7 +447,6 @@
 
         window.triggerRender = renderTongHopTable;
 
-        // Tính năng Tải danh sách tham gia (Xuất file CSV báo cáo)
         window.taiDanhSachThamGia = function() {
             if (currentRenderList.length === 0) {
                 alert("Chưa có sinh viên nào tham gia sự kiện này để tải!");
@@ -475,6 +491,19 @@
             const suKienName = document.getElementById("chonHoatDong").value;
             const mssvInput = document.getElementById("adminMssv").value.trim();
 
+            if (!suKienName) {
+                alert("Vui lòng chọn sự kiện cần check-in!");
+                return;
+            }
+
+            // Kiểm tra phân quyền sự kiện cho tài khoản CLB
+            if (currentRole && currentRole.suKienPhuTrach !== "ALL") {
+                if (!currentRole.suKienPhuTrach.includes(suKienName)) {
+                    alert("Bạn không có quyền điểm danh cho sự kiện này!");
+                    return;
+                }
+            }
+
             if (!/^312\d{7}$/.test(mssvInput)) {
                 alert("Mã số sinh viên không hợp lệ! Phải bắt đầu bằng '312' và đúng 10 chữ số.");
                 return;
@@ -518,6 +547,10 @@
         });
 
         window.xoaCheckinSK = async function(id) {
+            if (!currentRole || !currentRole.quyenXoa) {
+                alert("Bạn không có quyền thực hiện thao tác xóa này!");
+                return;
+            }
             if (confirm("Bạn có chắc chắn muốn xóa lượt check-in này?")) {
                 await deleteDoc(doc(db, "DiemDanh_SuKien", id));
             }
@@ -527,16 +560,6 @@
             window.globalAdminSnapshot = snap;
             renderAdminHoSoTable();
         });
-
-        // Khởi tạo mặc định sự kiện đầu tiên khi vừa đăng nhập
-        setTimeout(() => {
-            const selectSk = document.getElementById("chonHoatDong");
-            if (selectSk && selectSk.options.length > 1) {
-                selectSk.selectedIndex = 1;
-                document.getElementById("tieuDeBangQuanLy").innerText = `Danh sách: ${selectSk.value}`;
-                renderTongHopTable();
-            }
-        }, 300);
     </script>
 </body>
 </html>
