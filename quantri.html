@@ -57,6 +57,10 @@
         .filter-btn { flex: 1; padding: 12px 20px; background: #f0fdf4; color: #166534; border: 2px solid #bbf7d0; border-radius: 20px; font-weight: 900; cursor: pointer; transition: all 0.3s; text-align: center; }
         .filter-btn.active { background: linear-gradient(135deg, #15803d 0%, #ca8a04 100%); color: #fff; border-color: transparent; box-shadow: 0 4px 15px rgba(22, 101, 52, 0.25); }
 
+        .hocky-tabs { display: flex; gap: 12px; margin-bottom: 25px; flex-wrap: wrap; background: #f0fdf4; padding: 10px; border-radius: 25px; border: 2px solid #bbf7d0; }
+        .hk-btn { flex: 1; min-width: 180px; padding: 12px 20px; background: #ffffff; color: #166534; border: 2px solid #bbf7d0; border-radius: 18px; font-weight: 900; font-size: 0.95rem; cursor: pointer; transition: all 0.3s; text-align: center; }
+        .hk-btn.active { background: linear-gradient(135deg, #15803d 0%, #ca8a04 100%); color: #fff; border-color: transparent; box-shadow: 0 4px 15px rgba(22, 101, 52, 0.25); }
+
         .badge-dangky { background-color: #dcfce7; color: #166534; padding: 5px 12px; border-radius: 15px; font-weight: 800; font-size: 12px; border: 1px solid #bbf7d0; display: inline-block; }
         .badge-vanglai { background-color: #fef9c3; color: #854d0e; padding: 5px 12px; border-radius: 15px; font-weight: 800; font-size: 12px; border: 1px solid #fef08a; display: inline-block; }
         .badge-chuadi { background-color: #f3f4f6; color: #6b7280; padding: 5px 12px; border-radius: 15px; font-weight: 800; font-size: 12px; border: 1px solid #e5e7eb; display: inline-block; }
@@ -103,10 +107,18 @@
             </div>
         </div>
 
-        <!-- TAB 2: QUẢN LÝ SỰ KIỆN (BẢNG TỔNG HỢP GỢI Ý ĐĂNG KÝ & CHECK-IN) -->
+        <!-- TAB 2: QUẢN LÝ SỰ KIỆN -->
         <div id="tabQuanLySK" class="tab-content">
-            <h2>Bảng Tổng Hợp Đăng Ký & Check-in Sự Kiện</h2>
+            <h2>Quản lý Sự kiện & Điểm danh</h2>
+            <p style="margin-bottom: 20px; color: #4b5563; font-weight: 700;">Chọn Học kỳ để quản lý các chương trình:</p>
             
+            <!-- Mục chọn học kỳ đồng bộ với web sinh viên -->
+            <div class="hocky-tabs">
+                <button class="hk-btn active" onclick="chuyenHocKyAdmin('hk1', this)">Học kỳ 1 (2026 - 2027)</button>
+                <button class="hk-btn" onclick="chuyenHocKyAdmin('hk2', this)">Học kỳ 2 (2026 - 2027)</button>
+                <button class="hk-btn" onclick="chuyenHocKyAdmin('hk3', this)">Học kỳ 3 (2026 - 2027)</button>
+            </div>
+
             <!-- Khung thao tác Check-in nhanh -->
             <form id="adminDiemDanhForm" class="add-dd-box">
                 <select id="chonHoatDong" required>
@@ -116,6 +128,11 @@
                 <input type="text" id="adminMssv" placeholder="Nhập MSSV (VD: 3123130144)..." required>
                 <button type="submit" class="add-dd-btn">Xác nhận Check-in</button>
             </form>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; margin-bottom: 10px;">
+                <h3 id="tieuDeBangQuanLy" style="color: #166534; font-size: 1.2rem; font-weight: 900;">Danh sách: Workshop Làm đồ dân gian</h3>
+                <button class="add-dd-btn" onclick="taiDanhSachThamGia()" style="padding: 10px 20px; font-size: 13px; background: linear-gradient(135deg, #15803d 0%, #166534 100%);">📥 Tải danh sách tham gia (CSV)</button>
+            </div>
 
             <div class="table-responsive">
                 <table>
@@ -150,6 +167,14 @@
         let currentRole = null;
         let selectedAdminDanhHieu = "Sinh viên 5 Tốt";
         let globalAdminSnapshot = null;
+        let currentHkSelected = "hk1";
+
+        // Danh sách sự kiện cấu hình theo học kỳ
+        const SU_KIEN_THEO_HK = {
+            "hk1": ["Workshop Làm đồ dân gian", "Ngày hội CLB khoa NN", "Lễ đón TSV K26"],
+            "hk2": ["Hội thao truyền thống", "Cuộc thi Hùng biện tiếng Anh"],
+            "hk3": ["Tổng kết chiến dịch Mùa hè xanh", "Đêm hội văn nghệ khoa"]
+        };
 
         function kiemTraMatKhau() {
             const val = document.getElementById("adminPassword").value.trim();
@@ -179,6 +204,34 @@
             btnElement.classList.add('active');
             renderAdminHoSoTable();
         }
+
+        function chuyenHocKyAdmin(hkId, btnElement) {
+            currentHkSelected = hkId;
+            document.querySelectorAll('.hk-btn').forEach(btn => btn.classList.remove('active'));
+            btnElement.classList.add('active');
+
+            // Cập nhật lại dropdown danh sách sự kiện phù hợp với học kỳ
+            const selectSk = document.getElementById("chonHoatDong");
+            selectSk.innerHTML = `<option value="" disabled selected>-- Chọn sự kiện check-in --</option>`;
+            
+            if (SU_KIEN_THEO_HK[hkId]) {
+                SU_KIEN_THEO_HK[hkId].forEach(sk => {
+                    const opt = document.createElement("option");
+                    opt.value = sk;
+                    opt.innerText = sk;
+                    selectSk.appendChild(opt);
+                });
+                // Tự động chọn sự kiện đầu tiên của học kỳ
+                selectSk.value = SU_KIEN_THEO_HK[hkId][0];
+                document.getElementById("tieuDeBangQuanLy").innerText = `Danh sách: ${SU_KIEN_THEO_HK[hkId][0]}`;
+            }
+            if (typeof window.triggerRender === 'function') window.triggerRender();
+        }
+
+        document.getElementById("chonHoatDong").addEventListener("change", function(e) {
+            document.getElementById("tieuDeBangQuanLy").innerText = `Danh sách: ${e.target.value}`;
+            if (typeof window.triggerRender === 'function') window.triggerRender();
+        });
 
         function renderAdminHoSoTable() {
             if (!globalAdminSnapshot) return;
@@ -273,16 +326,25 @@
 
         let regDataList = [];
         let checkinDataList = [];
+        let currentRenderList = []; // Lưu lại danh sách hiện tại để phục vụ tính năng xuất file
 
         function renderTongHopTable() {
             const tableBody = document.getElementById("adminListTongHopSK");
             if (!tableBody) return;
             tableBody.innerHTML = "";
+            currentRenderList = [];
             let stt = 1;
+
+            const selectedSk = document.getElementById("chonHoatDong").value;
+            if (!selectedSk) return;
+
+            // Lọc dữ liệu theo đúng sự kiện đang chọn trên giao diện
+            const hkRegs = regDataList.filter(item => item.su_kien === selectedSk);
+            const hkCheckins = checkinDataList.filter(item => item.su_kien === selectedSk);
 
             const mssvMap = new Map();
 
-            regDataList.forEach(item => {
+            hkRegs.forEach(item => {
                 mssvMap.set(item.mssv, {
                     mssv: item.mssv,
                     ho_ten: item.ho_ten,
@@ -294,7 +356,7 @@
                 });
             });
 
-            checkinDataList.forEach(item => {
+            hkCheckins.forEach(item => {
                 if (mssvMap.has(item.mssv)) {
                     mssvMap.get(item.mssv).checkinItem = item;
                 } else {
@@ -323,16 +385,32 @@
 
                 let trangThaiHTML = "";
                 let thaoTacHTML = "---";
+                let trangThaiText = "";
 
                 if (data.hasReg && data.checkinItem) {
                     trangThaiHTML = `<span class="badge-dangky">✓ Đã ĐK & Đã đi</span>`;
+                    trangThaiText = "Đã đăng ký & Đã tham gia";
                     thaoTacHTML = `<button class="delete-btn" onclick="xoaCheckinSK('${data.checkinItem.id}')">Xóa</button>`;
                 } else if (data.hasReg && !data.checkinItem) {
                     trangThaiHTML = `<span class="badge-chuadi">⏳ Đã ĐK (Chưa đi)</span>`;
+                    trangThaiText = "Đã đăng ký (Chưa đi)";
                     thaoTacHTML = "---";
                 } else if (!data.hasReg && data.checkinItem) {
                     trangThaiHTML = `<span class="badge-vanglai">⚡ Khách vãng lai</span>`;
+                    trangThaiText = "Khách vãng lai";
                     thaoTacHTML = `<button class="delete-btn" onclick="xoaCheckinSK('${data.checkinItem.id}')">Xóa</button>`;
+                }
+
+                // Lưu lại dòng dữ liệu nếu sinh viên có tham gia thực tế (phục vụ nút tải file)
+                if (data.checkinItem) {
+                    currentRenderList.push({
+                        stt: stt,
+                        mssv: data.mssv,
+                        ho_ten: data.ho_ten,
+                        lop: data.lop,
+                        trang_thai: trangThaiText,
+                        thoi_gian_checkin: thoiGianCheckinStr
+                    });
                 }
 
                 const tr = document.createElement("tr");
@@ -348,6 +426,31 @@
                 `;
                 tableBody.appendChild(tr);
             });
+        }
+
+        window.triggerRender = renderTongHopTable;
+
+        // Tính năng Tải danh sách tham gia (Xuất file CSV báo cáo)
+        window.taiDanhSachThamGia = function() {
+            if (currentRenderList.length === 0) {
+                alert("Chưa có sinh viên nào tham gia sự kiện này để tải!");
+                return;
+            }
+
+            let csvContent = "\uFEFFSTT,Mã số sinh viên,Họ và tên,Lớp,Trạng thái tham gia,Thời gian Check-in\n";
+            currentRenderList.forEach((item, index) => {
+                csvContent += `"${index + 1}","${item.mssv}","${item.ho_ten}","${item.lop}","${item.trang_thai}","${item.thoi_gian_checkin}"\n`;
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            const selectedSk = document.getElementById("chonHoatDong").value || "SuKien";
+            link.setAttribute("download", `Danh_Sach_Tham_Gia_${selectedSk.replace(/\s+/g, '_')}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
         onSnapshot(query(collection(db, "DangKy_SuKien"), orderBy("thoi_gian_dk", "desc")), (snapshot) => {
@@ -424,6 +527,16 @@
             window.globalAdminSnapshot = snap;
             renderAdminHoSoTable();
         });
+
+        // Khởi tạo mặc định sự kiện đầu tiên khi vừa đăng nhập
+        setTimeout(() => {
+            const selectSk = document.getElementById("chonHoatDong");
+            if (selectSk && selectSk.options.length > 1) {
+                selectSk.selectedIndex = 1;
+                document.getElementById("tieuDeBangQuanLy").innerText = `Danh sách: ${selectSk.value}`;
+                renderTongHopTable();
+            }
+        }, 300);
     </script>
 </body>
 </html>
