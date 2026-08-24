@@ -127,6 +127,7 @@
                             <th>Lớp</th>
                             <th>Thời gian ĐK</th>
                             <th>Trạng thái</th>
+                            <th>Thời gian check-in</th>
                             <th>Thao tác</th>
                         </tr>
                     </thead>
@@ -270,7 +271,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Lắng nghe đồng thời cả 2 bảng: Đăng ký và Điểm danh để ghép chung
         let regDataList = [];
         let checkinDataList = [];
 
@@ -280,7 +280,6 @@
             tableBody.innerHTML = "";
             let stt = 1;
 
-            // 1. Tạo tập hợp chứa tất cả các MSSV duy nhất từ cả Đăng ký và Check-in
             const mssvMap = new Map();
 
             regDataList.forEach(item => {
@@ -299,7 +298,6 @@
                 if (mssvMap.has(item.mssv)) {
                     mssvMap.get(item.mssv).checkinItem = item;
                 } else {
-                    // Khách vãng lai (không đăng ký trước nhưng có check-in)
                     mssvMap.set(item.mssv, {
                         mssv: item.mssv,
                         ho_ten: item.ho_ten,
@@ -312,26 +310,27 @@
                 }
             });
 
-            // 2. Render ra bảng
             mssvMap.forEach((data) => {
-                let thoiGianStr = "---";
+                let thoiGianDkStr = "---";
                 if (data.thoi_gian_dk && typeof data.thoi_gian_dk.toDate === 'function') {
-                    thoiGianStr = data.thoi_gian_dk.toDate().toLocaleTimeString('vi-VN') + " - " + data.thoi_gian_dk.toDate().toLocaleDateString('vi-VN');
+                    thoiGianDkStr = data.thoi_gian_dk.toDate().toLocaleTimeString('vi-VN') + " - " + data.thoi_gian_dk.toDate().toLocaleDateString('vi-VN');
+                }
+
+                let thoiGianCheckinStr = "---";
+                if (data.checkinItem && data.checkinItem.thoi_gian && typeof data.checkinItem.thoi_gian.toDate === 'function') {
+                    thoiGianCheckinStr = data.checkinItem.thoi_gian.toDate().toLocaleTimeString('vi-VN') + " - " + data.checkinItem.thoi_gian.toDate().toLocaleDateString('vi-VN');
                 }
 
                 let trangThaiHTML = "";
                 let thaoTacHTML = "---";
 
                 if (data.hasReg && data.checkinItem) {
-                    // Đã đăng ký và có đi điểm danh
                     trangThaiHTML = `<span class="badge-dangky">✓ Đã ĐK & Đã đi</span>`;
-                    thaoTacHTML = `<button class="delete-btn" onclick="xoaCheckinSK('${data.checkinItem.id}')">Hủy Check-in</button>`;
+                    thaoTacHTML = `<button class="delete-btn" onclick="xoaCheckinSK('${data.checkinItem.id}')">Xóa</button>`;
                 } else if (data.hasReg && !data.checkinItem) {
-                    // Đăng ký nhưng chưa đi
                     trangThaiHTML = `<span class="badge-chuadi">⏳ Đã ĐK (Chưa đi)</span>`;
                     thaoTacHTML = "---";
                 } else if (!data.hasReg && data.checkinItem) {
-                    // Khách vãng lai
                     trangThaiHTML = `<span class="badge-vanglai">⚡ Khách vãng lai</span>`;
                     thaoTacHTML = `<button class="delete-btn" onclick="xoaCheckinSK('${data.checkinItem.id}')">Xóa</button>`;
                 }
@@ -342,8 +341,9 @@
                     <td><strong>${data.mssv}</strong></td>
                     <td>${data.ho_ten}</td>
                     <td>${data.lop}</td>
-                    <td>${thoiGianStr}</td>
+                    <td>${thoiGianDkStr}</td>
                     <td>${trangThaiHTML}</td>
+                    <td>${thoiGianCheckinStr}</td>
                     <td>${thaoTacHTML}</td>
                 `;
                 tableBody.appendChild(tr);
@@ -415,7 +415,7 @@
         });
 
         window.xoaCheckinSK = async function(id) {
-            if (confirm("Bạn có chắc chắn muốn hủy lượt check-in này?")) {
+            if (confirm("Bạn có chắc chắn muốn xóa lượt check-in này?")) {
                 await deleteDoc(doc(db, "DiemDanh_SuKien", id));
             }
         }
