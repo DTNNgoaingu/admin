@@ -7,7 +7,15 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 50%, #fefce8 100%); color: #2d3748; padding: 30px; min-height: 100vh; }
-        .container { max-width: 1400px; margin: 0 auto; background: #ffffff; padding: 45px; border-radius: 35px; box-shadow: 0 10px 30px rgba(22, 101, 52, 0.08); border: 3px solid #bbf7d0; }
+        
+        /* Giao diện khung đăng nhập mật khẩu admin */
+        #loginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+        .login-card { background: #ffffff; padding: 40px; border-radius: 30px; box-shadow: 0 15px 40px rgba(0,0,0,0.2); width: 100%; max-width: 400px; text-align: center; border: 3px solid #bbf7d0; }
+        .login-card h2 { color: #166534; margin-bottom: 20px; font-size: 1.5rem; font-weight: 900; }
+        .login-card input { width: 100%; padding: 14px 20px; border-radius: 20px; border: 2px solid #bbf7d0; outline: none; margin-bottom: 20px; font-size: 15px; text-align: center; font-weight: 700; background: #fafdfa; }
+        .login-card button { width: 100%; padding: 14px; background: linear-gradient(135deg, #15803d 0%, #ca8a04 100%); color: #fff; border: none; border-radius: 20px; font-weight: 900; font-size: 15px; cursor: pointer; box-shadow: 0 4px 15px rgba(22, 101, 52, 0.3); text-transform: uppercase; }
+
+        .container { max-width: 1400px; margin: 0 auto; background: #ffffff; padding: 45px; border-radius: 35px; box-shadow: 0 10px 30px rgba(22, 101, 52, 0.08); border: 3px solid #bbf7d0; display: none; }
         
         .admin-banner { background: linear-gradient(135deg, #15803d 0%, #22c55e 50%, #eab308 100%); color: white; padding: 25px 35px; border-radius: 25px; margin-bottom: 30px; box-shadow: 0 8px 25px rgba(22, 101, 52, 0.2); display: flex; justify-content: space-between; align-items: center; }
         .admin-banner h1 { font-size: 1.8rem; font-weight: 900; text-shadow: 0 2px 4px rgba(0,0,0,0.15); }
@@ -48,8 +56,17 @@
 </head>
 <body>
 
-    <div class="container">
-        <!-- Banner tiêu đề chuẩn chỉnh cho trang Quản trị -->
+    <!-- Khung nhập mật khẩu bảo mật nội bộ -->
+    <div id="loginOverlay">
+        <div class="login-card">
+            <h2>Đăng nhập Quản trị viên</h2>
+            <p style="margin-bottom: 15px; font-size: 0.9rem; color: #555;">Khu vực dành riêng cho Ban Chấp hành Đoàn - Hội Khoa.</p>
+            <input type="password" id="adminPassword" placeholder="Nhập mật khẩu nội bộ..." autofocus>
+            <button onclick="kiemTraMatKhau()">Truy cập hệ thống</button>
+        </div>
+    </div>
+
+    <div class="container" id="adminContainer">
         <div class="admin-banner">
             <div>
                 <h1>Hệ thống Quản trị & Điều hành FFL</h1>
@@ -137,6 +154,27 @@
     </div>
 
     <script>
+        // Mật khẩu nội bộ quản trị (Bạn có thể đổi chữ 'admin123' thành mật khẩu tùy ý)
+        const MAT_KHAU_ADMIN = "admin123";
+
+        function kiemTraMatKhau() {
+            const nhapVao = document.getElementById("adminPassword").value;
+            if (nhapVao === MAT_KHAU_ADMIN) {
+                document.getElementById("loginOverlay").style.display = "none";
+                document.getElementById("adminContainer").style.display = "block";
+            } else {
+                alert("Mật khẩu không chính xác! Vui lòng thử lại.");
+                document.getElementById("adminPassword").value = "";
+            }
+        }
+
+        // Cho phép nhấn phím Enter để đăng nhập nhanh
+        document.getElementById("adminPassword").addEventListener("keypress", function(e) {
+            if (e.key === 'Enter') {
+                kiemTraMatKhau();
+            }
+        });
+
         function chuyenTab(idTab) {
             document.getElementById('tabHoSo').classList.remove('active');
             document.getElementById('tabDiemDanh').classList.remove('active');
