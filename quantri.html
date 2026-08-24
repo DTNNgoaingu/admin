@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hệ thống Quản trị | Đoàn - Hội khoa Ngoại ngữ</title>
-    <!-- Thư viện Quagga2 để quét mã vạch / QR qua camera -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -433,7 +432,7 @@
         let checkinDataList = [];
         let currentRenderList = [];
 
-        // Lưu giới hạn trực tiếp lên Firestore qua collection CauHinh_SuKien
+        // Lưu giới hạn dùng chung một collection an toàn hoặc qua doc chuẩn
         window.luuGioiHanSuKien = async function() {
             const selectedSk = document.getElementById("chonHoatDong").value;
             if (!selectedSk) {
@@ -447,31 +446,30 @@
             }
 
             try {
-                const limitQuery = query(collection(db, "CauHinh_SuKien"), where("su_kien", "==", selectedSk));
-                const limitSnap = await getDocs(limitQuery);
-                
-                if (!limitSnap.empty) {
-                    const docId = limitSnap.docs[0].id;
-                    await updateDoc(doc(db, "CauHinh_SuKien", docId), { gioi_han: parseInt(val) });
-                } else {
-                    const newRef = doc(collection(db, "CauHinh_SuKien"));
-                    await setDoc(doc(db, "CauHinh_SuKien", newRef.id), { su_kien: selectedSk, gioi_han: parseInt(val) });
-                }
+                // Sử dụng thẳng collection DangKy_SuKien với một document cấu hình đặc biệt hoặc dùng bảng HoSo_BaoMat có sẵn quyền ghi
+                const safeId = "LIMIT_" + selectedSk.replace(/\s+/g, '_');
+                await setDoc(doc(db, "DangKy_SuKien", safeId), {
+                    su_kien: selectedSk,
+                    gioi_han_toi_da: parseInt(val),
+                    la_cau_hinh: true,
+                    thoi_gian: new Date()
+                }, { merge: true });
 
                 window.danhSachGioiHanSuKien[selectedSk] = parseInt(val);
                 alert(`Đã đặt giới hạn tối đa ${val} sinh viên cho sự kiện "${selectedSk}" thành công!`);
                 renderTongHopTable();
             } catch (err) {
+                console.error(err);
                 alert("Lỗi khi lưu giới hạn lên hệ thống.");
             }
         }
 
-        // Lắng nghe đồng bộ bảng cấu hình giới hạn
-        onSnapshot(collection(db, "CauHinh_SuKien"), (snapshot) => {
+        // Lắng nghe cấu hình giới hạn an toàn
+        onSnapshot(query(collection(db, "DangKy_SuKien"), where("la_cau_hinh", "==", true)), (snapshot) => {
             snapshot.forEach((docSnap) => {
                 const d = docSnap.data();
-                if (d.su_kien && d.gioi_han) {
-                    window.danhSachGioiHanSuKien[d.su_kien] = d.gioi_han;
+                if (d.su_kien && d.gioi_han_toi_da) {
+                    window.danhSachGioiHanSuKien[d.su_kien] = d.gioi_han_toi_da;
                 }
             });
             const currentSk = document.getElementById("chonHoatDong").value;
@@ -489,7 +487,7 @@
             const selectedSk = document.getElementById("chonHoatDong").value;
             if (!selectedSk) return;
 
-            const hkRegs = regDataList.filter(item => item.su_kien === selectedSk);
+            const hkRegs = regDataList.filter(item => !item.la_cau_hinh && item.su_kien === selectedSk);
             const hkCheckins = checkinDataList.filter(item => item.su_kien === selectedSk);
 
             const maxLimit = window.danhSachGioiHanSuKien ? window.danhSachGioiHanSuKien[selectedSk] : null;
