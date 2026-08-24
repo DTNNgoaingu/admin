@@ -53,7 +53,6 @@
         .input-scan-group { flex: 1; min-width: 260px; display: flex; gap: 8px; align-items: center; }
         .input-scan-group input { flex: 1; min-width: 140px; margin: 0; }
 
-        /* Khung thiết lập giới hạn sự kiện */
         .limit-config-box { display: flex; gap: 10px; align-items: center; width: 100%; background: #fefce8; padding: 15px 20px; border-radius: 20px; border: 2px dashed #eab308; margin-bottom: 15px; }
         .limit-config-box input { width: 140px; padding: 10px 15px; border-radius: 15px; border: 2px solid #fde047; text-align: center; }
         .limit-btn { padding: 10px 20px; background: linear-gradient(135deg, #ca8a04 0%, #a16207 100%); color: #fff; border: none; border-radius: 15px; font-weight: 900; font-size: 13px; cursor: pointer; box-shadow: 0 4px 12px rgba(202, 138, 4, 0.3); }
@@ -80,7 +79,6 @@
         .badge-vanglai { background-color: #fef9c3; color: #854d0e; padding: 5px 12px; border-radius: 15px; font-weight: 800; font-size: 12px; border: 1px solid #fef08a; display: inline-block; }
         .badge-chuadi { background-color: #f3f4f6; color: #6b7280; padding: 5px 12px; border-radius: 15px; font-weight: 800; font-size: 12px; border: 1px solid #e5e7eb; display: inline-block; }
 
-        /* Modal camera scanner styling */
         #scannerModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; }
         .scanner-container { background: #fff; padding: 25px; border-radius: 25px; width: 100%; max-width: 480px; text-align: center; border: 3px solid #bbf7d0; box-shadow: 0 15px 35px rgba(0,0,0,0.3); }
         .scanner-container h3 { color: #166534; margin-bottom: 15px; font-size: 1.25rem; font-weight: 900; }
@@ -101,7 +99,6 @@
         </div>
     </div>
 
-    <!-- Modal giao diện camera quét mã vạch -->
     <div id="scannerModal">
         <div class="scanner-container">
             <h3>Đưa mã vạch MSSV vào khung camera</h3>
@@ -123,7 +120,6 @@
             <button class="tab-btn" onclick="chuyenTab('tabQuanLySK')">Quản lý Sự kiện & Điểm danh</button>
         </div>
 
-        <!-- TAB 1: XÉT DUYỆT HỒ SƠ -->
         <div id="tabHoSo" class="tab-content active">
             <h2>Danh sách hồ sơ ứng tuyển danh hiệu</h2>
             <div class="filter-tabs" style="max-width: 400px; margin-bottom: 20px;">
@@ -140,7 +136,6 @@
             </div>
         </div>
 
-        <!-- TAB 2: QUẢN LÝ SỰ KIỆN -->
         <div id="tabQuanLySK" class="tab-content">
             <h2>Quản lý Sự kiện & Điểm danh</h2>
             <p style="margin-bottom: 20px; color: #4b5563; font-weight: 700;">Chọn Học kỳ để quản lý các chương trình:</p>
@@ -151,7 +146,6 @@
                 <button class="hk-btn" onclick="chuyenHocKyAdmin('hk3', this)">Học kỳ 3 (2026 - 2027)</button>
             </div>
 
-            <!-- Khung thiết lập số lượng tối đa cho sự kiện đang chọn -->
             <div class="limit-config-box">
                 <span style="font-weight: 900; color: #854d0e; font-size: 14px;">⚙️ Giới hạn số lượng tối đa:</span>
                 <input type="number" id="inputGioiHanSoLuong" min="1" placeholder="Số lượng...">
@@ -159,7 +153,6 @@
                 <span id="thongTinSoLuongHienTai" style="font-size: 13px; font-weight: 700; color: #166534; margin-left: auto;"></span>
             </div>
 
-            <!-- Khung thao tác Check-in nhanh kèm nút Quét MSSV -->
             <form id="adminDiemDanhForm" class="add-dd-box">
                 <select id="chonHoatDong" required>
                     <option value="" disabled selected>-- Chọn sự kiện check-in --</option>
@@ -200,7 +193,6 @@
     </div>
 
     <script>
-        // CHUẨN HÓA PHÂN QUYỀN VÀ TÊN GỌI CHÍNH XÁC
         const PHAN_QUYEN = {
             "bt2026": { ten: "Bí thư Đoàn khoa", quyenHoSo: true, quyenXoa: true, suKienPhuTrach: "ALL" },
             "lcht2026": { ten: "Liên Chi hội Trưởng Liên Chi hội Sinh viên khoa", quyenHoSo: true, quyenXoa: true, suKienPhuTrach: "ALL" },
@@ -217,7 +209,7 @@
         let globalAdminSnapshot = null;
         let currentHkSelected = "hk1";
         let isScannerRunning = false;
-        let danhSachGioiHanSuKien = {}; // Lưu giới hạn số lượng cho từng sự kiện
+        let danhSachGioiHanSuKien = {};
 
         const SU_KIEN_THEO_HK = {
             "hk1": ["Workshop Làm đồ dân gian", "Ngày hội CLB khoa NN", "Lễ đón TSV K26"],
@@ -307,24 +299,6 @@
             if (typeof window.triggerRender === 'function') window.triggerRender();
         });
 
-        // Hàm lưu giới hạn số lượng cho sự kiện
-        window.luuGioiHanSuKien = function() {
-            const selectedSk = document.getElementById("chonHoatDong").value;
-            if (!selectedSk) {
-                alert("Vui lòng chọn sự kiện trước khi đặt giới hạn!");
-                return;
-            }
-            const val = document.getElementById("inputGioiHanSoLuong").value.trim();
-            if (val === "" || parseInt(val) <= 0) {
-                alert("Vui lòng nhập một số lượng hợp lệ lớn hơn 0!");
-                return;
-            }
-            danhSachGioiHanSuKien[selectedSk] = parseInt(val);
-            alert(`Đã đặt giới hạn tối đa ${val} sinh viên cho sự kiện "${selectedSk}" thành công!`);
-            if (typeof window.triggerRender === 'function') window.triggerRender();
-        }
-
-        // Tích hợp chức năng Quagga2 Quét Mã vạch / QR qua Camera
         function batDauQuetCamera() {
             document.getElementById("scannerModal").style.display = "flex";
             if (isScannerRunning) return;
@@ -334,16 +308,11 @@
                     name: "Live",
                     type: "LiveStream",
                     target: document.querySelector('#interactive'),
-                    constraints: {
-                        facingMode: "environment"
-                    }
+                    constraints: { facingMode: "environment" }
                 },
-                decoder: {
-                    readers: ["code_128_reader", "ean_reader", "ean_8_reader", "code_39_reader", "upc_reader"]
-                }
+                decoder: { readers: ["code_128_reader", "ean_reader", "ean_8_reader", "code_39_reader", "upc_reader"] }
             }, function(err) {
                 if (err) {
-                    console.error(err);
                     alert("Không thể khởi động camera hoặc trình duyệt từ chối quyền truy cập!");
                     dongCamera();
                     return;
@@ -464,6 +433,52 @@
         let checkinDataList = [];
         let currentRenderList = [];
 
+        // Lưu giới hạn trực tiếp lên Firestore qua collection CauHinh_SuKien
+        window.luuGioiHanSuKien = async function() {
+            const selectedSk = document.getElementById("chonHoatDong").value;
+            if (!selectedSk) {
+                alert("Vui lòng chọn sự kiện trước khi đặt giới hạn!");
+                return;
+            }
+            const val = document.getElementById("inputGioiHanSoLuong").value.trim();
+            if (val === "" || parseInt(val) <= 0) {
+                alert("Vui lòng nhập một số lượng hợp lệ lớn hơn 0!");
+                return;
+            }
+
+            try {
+                const limitQuery = query(collection(db, "CauHinh_SuKien"), where("su_kien", "==", selectedSk));
+                const limitSnap = await getDocs(limitQuery);
+                
+                if (!limitSnap.empty) {
+                    const docId = limitSnap.docs[0].id;
+                    await updateDoc(doc(db, "CauHinh_SuKien", docId), { gioi_han: parseInt(val) });
+                } else {
+                    const newRef = doc(collection(db, "CauHinh_SuKien"));
+                    await setDoc(doc(db, "CauHinh_SuKien", newRef.id), { su_kien: selectedSk, gioi_han: parseInt(val) });
+                }
+
+                window.danhSachGioiHanSuKien[selectedSk] = parseInt(val);
+                alert(`Đã đặt giới hạn tối đa ${val} sinh viên cho sự kiện "${selectedSk}" thành công!`);
+                renderTongHopTable();
+            } catch (err) {
+                alert("Lỗi khi lưu giới hạn lên hệ thống.");
+            }
+        }
+
+        // Lắng nghe đồng bộ bảng cấu hình giới hạn
+        onSnapshot(collection(db, "CauHinh_SuKien"), (snapshot) => {
+            snapshot.forEach((docSnap) => {
+                const d = docSnap.data();
+                if (d.su_kien && d.gioi_han) {
+                    window.danhSachGioiHanSuKien[d.su_kien] = d.gioi_han;
+                }
+            });
+            const currentSk = document.getElementById("chonHoatDong").value;
+            if (currentSk) capNhatHienThiGioiHan(currentSk);
+            renderTongHopTable();
+        });
+
         function renderTongHopTable() {
             const tableBody = document.getElementById("adminListTongHopSK");
             if (!tableBody) return;
@@ -477,14 +492,13 @@
             const hkRegs = regDataList.filter(item => item.su_kien === selectedSk);
             const hkCheckins = checkinDataList.filter(item => item.su_kien === selectedSk);
 
-            // Hiển thị thống kê số lượng đã check-in so với giới hạn
             const maxLimit = window.danhSachGioiHanSuKien ? window.danhSachGioiHanSuKien[selectedSk] : null;
             const infoText = document.getElementById("thongTinSoLuongHienTai");
             if (infoText) {
                 if (maxLimit) {
-                    infoText.innerText = `Đã tham gia: ${hkCheckins.length} / ${maxLimit} sinh viên`;
+                    infoText.innerText = `Đã đăng ký: ${hkRegs.length} | Đã check-in: ${hkCheckins.length} / ${maxLimit}`;
                 } else {
-                    infoText.innerText = `Đã tham gia: ${hkCheckins.length} sinh viên (Chưa đặt giới hạn)`;
+                    infoText.innerText = `Đã đăng ký: ${hkRegs.length} | Đã check-in: ${hkCheckins.length} (Chưa đặt giới hạn)`;
                 }
             }
 
@@ -640,20 +654,9 @@
 
             try {
                 const checkQ = query(collection(db, "DiemDanh_SuKien"), where("mssv", "==", mssvInput), where("su_kien", "==", suKienName));
-                const checkSnap = await getDocs(checkQ);
-                if (!checkSnap.empty) {
+                if (!(await getDocs(checkQ)).empty) {
                     alert("Sinh viên này đã check-in sự kiện này rồi!");
                     return;
-                }
-
-                // Kiểm tra giới hạn số lượng tối đa nếu có thiết lập
-                const maxLimit = window.danhSachGioiHanSuKien ? window.danhSachGioiHanSuKien[suKienName] : null;
-                if (maxLimit) {
-                    const currentCheckinCount = checkinDataList.filter(item => item.su_kien === suKienName).length;
-                    if (currentCheckinCount >= maxLimit) {
-                        alert(`Sự kiện này đã đạt số lượng tối đa cho phép (${maxLimit} sinh viên). Không thể check-in thêm!`);
-                        return;
-                    }
                 }
 
                 const regQ = query(collection(db, "DangKy_SuKien"), where("mssv", "==", mssvInput), where("su_kien", "==", suKienName));
