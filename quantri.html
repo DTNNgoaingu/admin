@@ -98,6 +98,7 @@
                 <table>
                     <thead>
                         <tr>
+                            <th>STT</th>
                             <th>Họ tên</th>
                             <th>MSSV</th>
                             <th>Lớp</th>
@@ -124,7 +125,7 @@
                 <select id="chonHoatDong" required>
                     <option value="" disabled selected>-- Chọn hoạt động được phân quyền --</option>
                 </select>
-                <input type="text" id="adminMssv" placeholder="Nhập Mã số sinh viên (MSSV)..." required>
+                <input type="text" id="adminMssv" placeholder="Nhập MSSV (VD: 3123130144)..." required>
                 <button type="submit" class="add-dd-btn">Thêm điểm danh</button>
             </form>
 
@@ -153,38 +154,13 @@
     </div>
 
     <script>
-        // PHÂN QUYỀN MẬT KHẨU: TẤT CẢ 5 CLB ĐỀU CHỈ CÓ "Ngày hội CLB khoa NN" + Hoạt động riêng
         const PHAN_QUYEN = {
-            "admin123": {
-                ten: "Đoàn Khoa Ngoại ngữ",
-                quyenHoSo: true,
-                activities: ["DiemDanh_HK1_HD1", "DiemDanh_HK1_HD2", "DiemDanh_HK2_HD1", "DiemDanh_HK2_HD2", "DiemDanh_HK3_HD1", "DiemDanh_HK3_HD2"]
-            },
-            "mod2026": {
-                ten: "CLB MOD",
-                quyenHoSo: false,
-                activities: ["DiemDanh_HK1_HD1"] // Chỉ Ngày hội CLB khoa NN
-            },
-            "ec2026": {
-                ten: "CLB English Club (EC)",
-                quyenHoSo: false,
-                activities: ["DiemDanh_HK1_HD1", "DiemDanh_HK2_HD2"] // Ngày hội CLB + Hùng biện tiếng Anh
-            },
-            "fflc2026": {
-                ten: "CLB FFLC",
-                quyenHoSo: false,
-                activities: ["DiemDanh_HK1_HD1", "DiemDanh_HK2_HD1"] // Ngày hội CLB + Hội thao
-            },
-            "media2026": {
-                ten: "CLB Media",
-                quyenHoSo: false,
-                activities: ["DiemDanh_HK1_HD1", "DiemDanh_HK3_HD2"] // Ngày hội CLB + Văn nghệ khoa
-            },
-            "fmcc2026": {
-                ten: "CLB FMCC",
-                quyenHoSo: false,
-                activities: ["DiemDanh_HK1_HD1", "DiemDanh_HK3_HD1"] // Ngày hội CLB + Mùa hè xanh
-            }
+            "admin123": { ten: "Đoàn Khoa Ngoại ngữ", quyenHoSo: true, activities: ["DiemDanh_HK1_HD1", "DiemDanh_HK1_HD2", "DiemDanh_HK2_HD1", "DiemDanh_HK2_HD2", "DiemDanh_HK3_HD1", "DiemDanh_HK3_HD2"] },
+            "mod2026": { ten: "CLB MOD", quyenHoSo: false, activities: ["DiemDanh_HK1_HD1"] },
+            "ec2026": { ten: "CLB English Club (EC)", quyenHoSo: false, activities: ["DiemDanh_HK1_HD1", "DiemDanh_HK2_HD2"] },
+            "fflc2026": { ten: "CLB FFLC", quyenHoSo: false, activities: ["DiemDanh_HK1_HD1", "DiemDanh_HK2_HD1"] },
+            "media2026": { ten: "CLB Media", quyenHoSo: false, activities: ["DiemDanh_HK1_HD1", "DiemDanh_HK3_HD2"] },
+            "fmcc2026": { ten: "CLB FMCC", quyenHoSo: false, activities: ["DiemDanh_HK1_HD1", "DiemDanh_HK3_HD1"] }
         };
 
         const ALL_ACTIVITIES = {
@@ -204,7 +180,6 @@
                 currentRole = PHAN_QUYEN[val];
                 document.getElementById("loginOverlay").style.display = "none";
                 document.getElementById("adminContainer").style.display = "block";
-                
                 document.getElementById("bannerTitle").innerText = `Hệ thống Quản trị - ${currentRole.ten}`;
 
                 if (!currentRole.quyenHoSo) {
@@ -249,7 +224,7 @@
                     const subDiv = document.createElement("div");
                     subDiv.className = "admin-hd-subcontent";
                     subDiv.id = `adm_${actKey}`;
-                    subDiv.innerHTML = `<div class="table-responsive"><table><thead><tr><th>MSSV</th><th>Thời gian</th><th>Xóa</th></tr></thead><tbody id="${actInfo.tableId}"></tbody></table></div>`;
+                    subDiv.innerHTML = `<div class="table-responsive"><table><thead><tr><th>STT</th><th>MSSV</th><th>Thời gian</th><th>Xóa</th></tr></thead><tbody id="${actInfo.tableId}"></tbody></table></div>`;
                     hkContentArea.appendChild(subDiv);
                 }
             });
@@ -269,7 +244,6 @@
             document.getElementById('tabHoSo').classList.remove('active');
             document.getElementById('tabDiemDanh').classList.remove('active');
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            
             document.getElementById(idTab).classList.add('active');
             event.currentTarget.classList.add('active');
         }
@@ -279,7 +253,6 @@
             document.getElementById('admin_hk2').classList.remove('active');
             document.getElementById('admin_hk3').classList.remove('active');
             document.querySelectorAll('.admin-hk-btn').forEach(btn => btn.classList.remove('active'));
-            
             document.getElementById(idHk).classList.add('active');
             event.currentTarget.classList.add('active');
         }
@@ -288,7 +261,6 @@
             const hkContainer = document.getElementById(hkId);
             hkContainer.querySelectorAll('.admin-hd-subcontent').forEach(sub => sub.classList.remove('active'));
             hkContainer.querySelectorAll('.admin-hd-btn').forEach(btn => btn.classList.remove('active'));
-            
             document.getElementById(subId).classList.add('active');
             btnElement.classList.add('active');
         }
@@ -317,11 +289,13 @@
         onSnapshot(qHoSo, (snapshot) => {
             if (!dataList) return;
             dataList.innerHTML = "";
+            let stt = 1;
             snapshot.forEach((docSnap) => {
                 const data = docSnap.data();
                 const docId = docSnap.id;
                 const tr = document.createElement("tr");
                 tr.innerHTML = `
+                    <td><strong>${stt++}</strong></td>
                     <td><strong>${data.ho_ten}</strong></td>
                     <td>${data.mssv}</td>
                     <td>${data.lop}</td>
@@ -364,16 +338,23 @@
             });
         });
 
+        // Xử lý nộp điểm danh với Validate định dạng MSSV (Bắt đầu bằng 312)
         const adminDiemDanhForm = document.getElementById("adminDiemDanhForm");
         adminDiemDanhForm.addEventListener("submit", async (e) => {
             e.preventDefault();
             const collectionName = document.getElementById("chonHoatDong").value;
             const mssvInput = document.getElementById("adminMssv").value.trim();
 
+            const mssvRegex = /^312\d{7}$/;
+            if (!mssvRegex.test(mssvInput)) {
+                alert("Mã số sinh viên không hợp lệ! Định dạng chuẩn phải bắt đầu bằng '312' và có 10 chữ số (VD: 3123130144).");
+                return;
+            }
+
             const checkQuery = query(collection(db, collectionName), where("mssv", "==", mssvInput));
             const snapshot = await getDocs(checkQuery);
             if (!snapshot.empty) {
-                alert("Mã số sinh viên này đã có trong danh sách của hoạt động này rồi!");
+                alert("Mã số sinh viên này đã có trong danh sách điểm danh của hoạt động này rồi!");
                 return;
             }
 
@@ -394,12 +375,13 @@
             if (!container) return;
             onSnapshot(query(collection(db, colName), orderBy("thoi_gian", "desc")), (snapshot) => {
                 container.innerHTML = "";
+                let stt = 1;
                 snapshot.forEach((docSnap) => {
                     const data = docSnap.data();
                     const docId = docSnap.id;
                     let thoiGianStr = data.thoi_gian ? data.thoi_gian.toDate().toLocaleTimeString('vi-VN') + " - " + data.thoi_gian.toDate().toLocaleDateString('vi-VN') : "";
                     const tr = document.createElement("tr");
-                    tr.innerHTML = `<td><strong>${data.mssv}</strong></td><td>${thoiGianStr}</td><td><button class="delete-btn" onclick="xoaDiemDanh('${colName}', '${docId}')">Xóa</button></td>`;
+                    tr.innerHTML = `<td><strong>${stt++}</strong></td><td><strong>${data.mssv}</strong></td><td>${thoiGianStr}</td><td><button class="delete-btn" onclick="xoaDiemDanh('${colName}', '${docId}')">Xóa</button></td>`;
                     container.appendChild(tr);
                 });
             });
