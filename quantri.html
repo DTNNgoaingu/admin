@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ thống Quản trị | FFL Admin</title>
+    <title>Hệ thống Quản trị | FFL Admin & Clubs</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 50%, #fefce8 100%); color: #2d3748; padding: 30px; min-height: 100vh; }
         
         #loginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 1000; }
         .login-card { background: #ffffff; padding: 40px; border-radius: 30px; box-shadow: 0 15px 40px rgba(0,0,0,0.2); width: 100%; max-width: 400px; text-align: center; border: 3px solid #bbf7d0; }
-        .login-card h2 { color: #166534; margin-bottom: 20px; font-size: 1.5rem; font-weight: 900; }
+        .login-card h2 { color: #166534; margin-bottom: 10px; font-size: 1.5rem; font-weight: 900; }
+        .login-card p { margin-bottom: 20px; font-size: 0.88rem; color: #555; }
         .login-card input { width: 100%; padding: 14px 20px; border-radius: 20px; border: 2px solid #bbf7d0; outline: none; margin-bottom: 20px; font-size: 15px; text-align: center; font-weight: 700; background: #fafdfa; }
         .login-card button { width: 100%; padding: 14px; background: linear-gradient(135deg, #15803d 0%, #ca8a04 100%); color: #fff; border: none; border-radius: 20px; font-weight: 900; font-size: 15px; cursor: pointer; box-shadow: 0 4px 15px rgba(22, 101, 52, 0.3); text-transform: uppercase; }
 
@@ -52,7 +53,6 @@
         .delete-btn { padding: 8px 16px; background: #fee2e2; color: #991b1b; border: 2px solid #fecaca; border-radius: 18px; font-weight: 900; cursor: pointer; font-size: 13px; }
         .delete-btn:hover { background: #fecaca; }
 
-        /* Bố cục Tab Học kỳ gọn gàng */
         .admin-hocky-tabs { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; background: #f0fdf4; padding: 10px; border-radius: 25px; border: 2px solid #bbf7d0; }
         .admin-hk-btn { flex: 1; min-width: 180px; padding: 14px 20px; background: #ffffff; color: #166534; border: 2px solid #bbf7d0; border-radius: 18px; font-weight: 900; font-size: 0.95rem; cursor: pointer; transition: all 0.3s; text-align: center; }
         .admin-hk-btn.active { background: linear-gradient(135deg, #15803d 0%, #ca8a04 100%); color: #fff; border-color: transparent; box-shadow: 0 4px 15px rgba(22, 101, 52, 0.25); }
@@ -71,27 +71,27 @@
 
     <div id="loginOverlay">
         <div class="login-card">
-            <h2>Đăng nhập Quản trị viên</h2>
-            <p style="margin-bottom: 15px; font-size: 0.9rem; color: #555;">Khu vực dành riêng cho Ban Chấp hành Đoàn - Hội Khoa.</p>
-            <input type="password" id="adminPassword" placeholder="Nhập mật khẩu nội bộ..." autofocus>
-            <button onclick="kiemTraMatKhau()">Truy cập hệ thống</button>
+            <h2>Đăng nhập Quản trị</h2>
+            <p>Dành cho Đoàn Khoa & Ban Chủ nhiệm 5 CLB:<br><strong>MOD, EC, FFLC, Media, FMCC</strong></p>
+            <input type="password" id="adminPassword" placeholder="Nhập mật khẩu truy cập..." autofocus>
+            <button onclick="kiemTraMatKhau()">Đăng nhập</button>
         </div>
     </div>
 
     <div class="container" id="adminContainer">
         <div class="admin-banner">
             <div>
-                <h1>Hệ thống Quản trị & Điều hành FFL</h1>
-                <p>Khoa Ngoại ngữ - Đại học Sài Gòn</p>
+                <h1 id="bannerTitle">Hệ thống Quản trị & Điều hành FFL</h1>
+                <p id="bannerSub">Khoa Ngoại ngữ - Đại học Sài Gòn</p>
             </div>
         </div>
 
-        <div class="tab-header">
+        <div class="tab-header" id="tabHeaderNav">
             <button class="tab-btn active" onclick="chuyenTab('tabHoSo')">Xét duyệt hồ sơ danh hiệu</button>
             <button class="tab-btn" onclick="chuyenTab('tabDiemDanh')">Quản lý điểm danh hoạt động</button>
         </div>
 
-        <!-- TAB 1: XÉT DUYỆT HỒ SƠ -->
+        <!-- TAB 1: XÉT DUYỆT HỒ SƠ (Chỉ Đoàn Khoa mới thấy) -->
         <div id="tabHoSo" class="tab-content active">
             <h2>Danh sách hồ sơ ứng tuyển danh hiệu</h2>
             <div class="table-responsive">
@@ -116,31 +116,19 @@
             </div>
         </div>
 
-        <!-- TAB 2: QUẢN LÝ ĐIỂM DANH GỌN GÀNG -->
+        <!-- TAB 2: QUẢN LÝ ĐIỂM DANH -->
         <div id="tabDiemDanh" class="tab-content">
-            <h2>Quản lý Điểm danh Hoạt động</h2>
+            <h2>Điểm danh nhanh theo Học kỳ và Hoạt động</h2>
             
             <form id="adminDiemDanhForm" class="add-dd-box">
                 <select id="chonHoatDong" required>
-                    <option value="" disabled selected>-- Chọn hoạt động & Học kỳ để thêm MSSV --</option>
-                    <optgroup label="Học kỳ 1 (2026 - 2027)">
-                        <option value="DiemDanh_HK1_HD1">Ngày hội CLB khoa NN (HK1)</option>
-                        <option value="DiemDanh_HK1_HD2">Lễ đón TSV K26 (HK1)</option>
-                    </optgroup>
-                    <optgroup label="Học kỳ 2 (2026 - 2027)">
-                        <option value="DiemDanh_HK2_HD1">Hội thao truyền thống (HK2)</option>
-                        <option value="DiemDanh_HK2_HD2">Cuộc thi Hùng biện tiếng Anh (HK2)</option>
-                    </optgroup>
-                    <optgroup label="Học kỳ 3 (2026 - 2027)">
-                        <option value="DiemDanh_HK3_HD1">Tổng kết chiến dịch Mùa hè xanh (HK3)</option>
-                        <option value="DiemDanh_HK3_HD2">Đêm hội văn nghệ khoa (HK3)</option>
-                    </optgroup>
+                    <option value="" disabled selected>-- Chọn hoạt động được phân quyền --</option>
+                    <!-- Các option sẽ được tự động lọc dựa vào quyền tài khoản đăng nhập -->
                 </select>
                 <input type="text" id="adminMssv" placeholder="Nhập Mã số sinh viên (MSSV)..." required>
                 <button type="submit" class="add-dd-btn">Thêm điểm danh</button>
             </form>
 
-            <!-- Tab chọn Học kỳ cho Admin -->
             <div class="admin-hocky-tabs">
                 <button class="admin-hk-btn active" onclick="chuyenAdminHocKy('admin_hk1')">Học kỳ 1 (2026 - 2027)</button>
                 <button class="admin-hk-btn" onclick="chuyenAdminHocKy('admin_hk2')">Học kỳ 2 (2026 - 2027)</button>
@@ -149,55 +137,28 @@
 
             <!-- ADMIN HK1 -->
             <div id="admin_hk1" class="admin-hocky-content active">
-                <div class="admin-hd-buttons">
-                    <button class="admin-hd-btn active" onclick="chuyenAdminSub('admin_hk1', 'adm_hd1_1', this)">Ngày hội CLB khoa NN</button>
-                    <button class="admin-hd-btn" onclick="chuyenAdminSub('admin_hk1', 'adm_hd1_2', this)">Lễ đón TSV K26</button>
+                <div class="admin-hd-buttons" id="hk1_buttons">
+                    <button class="admin-hd-btn active" onclick="chuyenAdminSub('admin_hk1', 'adm_hk1_hd1', this)">Ngày hội CLB khoa NN</button>
+                    <!-- Các hoạt động riêng của CLB sẽ xuất hiện ở đây nếu có quyền -->
                 </div>
-                <div id="adm_hd1_1" class="admin-hd-subcontent active">
+                <div id="adm_hk1_hd1" class="admin-hd-subcontent active">
                     <div class="table-responsive">
                         <table><thead><tr><th>MSSV</th><th>Thời gian</th><th>Xóa</th></tr></thead><tbody id="adminListHK1_HD1"></tbody></table>
-                    </div>
-                </div>
-                <div id="adm_hd1_2" class="admin-hd-subcontent">
-                    <div class="table-responsive">
-                        <table><thead><tr><th>MSSV</th><th>Thời gian</th><th>Xóa</th></tr></thead><tbody id="adminListHK1_HD2"></tbody></table>
                     </div>
                 </div>
             </div>
 
             <!-- ADMIN HK2 -->
             <div id="admin_hk2" class="admin-hocky-content">
-                <div class="admin-hd-buttons">
-                    <button class="admin-hd-btn active" onclick="chuyenAdminSub('admin_hk2', 'adm_hd2_1', this)">Hội thao truyền thống</button>
-                    <button class="admin-hd-btn" onclick="chuyenAdminSub('admin_hk2', 'adm_hd2_2', this)">Cuộc thi Hùng biện tiếng Anh</button>
-                </div>
-                <div id="adm_hd2_1" class="admin-hd-subcontent active">
-                    <div class="table-responsive">
-                        <table><thead><tr><th>MSSV</th><th>Thời gian</th><th>Xóa</th></tr></thead><tbody id="adminListHK2_HD1"></tbody></table>
-                    </div>
-                </div>
-                <div id="adm_hd2_2" class="admin-hd-subcontent">
-                    <div class="table-responsive">
-                        <table><thead><tr><th>MSSV</th><th>Thời gian</th><th>Xóa</th></tr></thead><tbody id="adminListHK2_HD2"></tbody></table>
-                    </div>
+                <div class="admin-hd-buttons" id="hk2_buttons">
+                    <!-- Hoạt động HK2 -->
                 </div>
             </div>
 
             <!-- ADMIN HK3 -->
             <div id="admin_hk3" class="admin-hocky-content">
-                <div class="admin-hd-buttons">
-                    <button class="admin-hd-btn active" onclick="chuyenAdminSub('admin_hk3', 'adm_hd3_1', this)">Tổng kết chiến dịch Mùa hè xanh</button>
-                    <button class="admin-hd-btn" onclick="chuyenAdminSub('admin_hk3', 'adm_hd3_2', this)">Đêm hội văn nghệ khoa</button>
-                </div>
-                <div id="adm_hd3_1" class="admin-hd-subcontent active">
-                    <div class="table-responsive">
-                        <table><thead><tr><th>MSSV</th><th>Thời gian</th><th>Xóa</th></tr></thead><tbody id="adminListHK3_HD1"></tbody></table>
-                    </div>
-                </div>
-                <div id="adm_hd3_2" class="admin-hd-subcontent">
-                    <div class="table-responsive">
-                        <table><thead><tr><th>MSSV</th><th>Thời gian</th><th>Xóa</th></tr></thead><tbody id="adminListHK3_HD2"></tbody></table>
-                    </div>
+                <div class="admin-hd-buttons" id="hk3_buttons">
+                    <!-- Hoạt động HK3 -->
                 </div>
             </div>
 
@@ -205,15 +166,73 @@
     </div>
 
     <script>
-        const MAT_KHAU_ADMIN = "admin123";
+        // PHÂN QUYỀN MẬT KHẨU CHO ĐOÀN KHOA VÀ 5 CLB
+        // Cấu trúc: mat_khau: { ten: "...", quyenHoSo: true/false, activities: [...] }
+        const PHAN_QUYEN = {
+            "admin123": {
+                ten: "Đoàn Khoa Ngoại ngữ",
+                quyenHoSo: true,
+                activities: ["DiemDanh_HK1_HD1", "DiemDanh_HK1_HD2", "DiemDanh_HK2_HD1", "DiemDanh_HK2_HD2", "DiemDanh_HK3_HD1", "DiemDanh_HK3_HD2"]
+            },
+            "mod2026": {
+                ten: "CLB MOD",
+                quyenHoSo: false,
+                activities: ["DiemDanh_HK1_HD1", "DiemDanh_HK1_HD2"] // Ngày hội CLB + 1 hoạt động riêng
+            },
+            "ec2026": {
+                ten: "CLB English Club (EC)",
+                quyenHoSo: false,
+                activities: ["DiemDanh_HK1_HD1", "DiemDanh_HK2_HD2"] // Ngày hội CLB + Hùng biện tiếng Anh
+            },
+            "fflc2026": {
+                ten: "CLB FFLC",
+                quyenHoSo: false,
+                activities: ["DiemDanh_HK1_HD1", "DiemDanh_HK2_HD1"] // Ngày hội CLB + Hội thao
+            },
+            "media2026": {
+                ten: "CLB Media",
+                quyenHoSo: false,
+                activities: ["DiemDanh_HK1_HD1", "DiemDanh_HK3_HD2"] // Ngày hội CLB + Văn nghệ khoa
+            },
+            "fmcc2026": {
+                ten: "CLB FMCC",
+                quyenHoSo: false,
+                activities: ["DiemDanh_HK1_HD1", "DiemDanh_HK3_HD1"] // Ngày hội CLB + Mùa hè xanh
+            }
+        };
+
+        // Danh sách thông tin toàn bộ các hoạt động hệ thống
+        const ALL_ACTIVITIES = {
+            "DiemDanh_HK1_HD1": { hk: "hk1", name: "Ngày hội CLB khoa NN", tableId: "adminListHK1_HD1" },
+            "DiemDanh_HK1_HD2": { hk: "hk1", name: "Lễ đón TSV K26", tableId: "adminListHK1_HD2" },
+            "DiemDanh_HK2_HD1": { hk: "hk2", name: "Hội thao truyền thống", tableId: "adminListHK2_HD1" },
+            "DiemDanh_HK2_HD2": { hk: "hk2", name: "Cuộc thi Hùng biện tiếng Anh", tableId: "adminListHK2_HD2" },
+            "DiemDanh_HK3_HD1": { hk: "hk3", name: "Tổng kết chiến dịch Mùa hè xanh", tableId: "adminListHK3_HD1" },
+            "DiemDanh_HK3_HD2": { hk: "hk3", name: "Đêm hội văn nghệ khoa", tableId: "adminListHK3_HD2" }
+        };
+
+        let currentRole = null;
 
         function kiemTraMatKhau() {
-            const nhapVao = document.getElementById("adminPassword").value;
-            if (nhapVao === MAT_KHAU_ADMIN) {
+            const val = document.getElementById("adminPassword").value.trim();
+            if (PHAN_QUYEN[val]) {
+                currentRole = PHAN_QUYEN[val];
                 document.getElementById("loginOverlay").style.display = "none";
                 document.getElementById("adminContainer").style.display = "block";
+                
+                // Hiển thị tên đơn vị trên banner
+                document.getElementById("bannerTitle").innerText = `Hệ thống Quản trị - ${currentRole.ten}`;
+
+                // Nếu không phải Đoàn khoa thì ẩn tab xét duyệt hồ sơ
+                if (!currentRole.quyenHoSo) {
+                    document.getElementById("tabHeaderNav").style.display = "none";
+                    // Chuyển thẳng sang tab điểm danh
+                    chuyenTab('tabDiemDanh');
+                }
+
+                buildPermissionsUI(currentRole.activities);
             } else {
-                alert("Mật khẩu không chính xác! Vui lòng thử lại.");
+                alert("Mật khẩu không chính xác! Vui lòng kiểm tra lại.");
                 document.getElementById("adminPassword").value = "";
             }
         }
@@ -221,6 +240,57 @@
         document.getElementById("adminPassword").addEventListener("keypress", function(e) {
             if (e.key === 'Enter') { kiemTraMatKhau(); }
         });
+
+        // Tự động dựng giao diện chọn hoạt động dựa vào quyền hạn của tài khoản đăng nhập
+        function buildPermissionsUI(allowedActs) {
+            const selectEl = document.getElementById("chonHoatDong");
+            selectEl.innerHTML = '<option value="" disabled selected>-- Chọn hoạt động được phân quyền --</option>';
+
+            // Xây dựng các select option và các tab subcontent cho từng HK
+            allowedActs.forEach(actKey => {
+                const actInfo = ALL_ACTIVITIES[actKey];
+                if (!actInfo) return;
+
+                // Thêm vào dropdown form thêm điểm danh
+                const opt = document.createElement("option");
+                opt.value = actKey;
+                opt.innerText = `${actInfo.name} (${actInfo.hk.toUpperCase()})`;
+                selectEl.appendChild(opt);
+
+                // Dựng giao diện bảng theo từng học kỳ
+                const btnContainer = document.getElementById(`${actInfo.hk}_buttons`);
+                if (btnContainer) {
+                    // Nếu chưa có nút này thì tạo mới
+                    if (!document.getElementById(`btn_${actKey}`)) {
+                        const btn = document.createElement("button");
+                        btn.className = "admin-hd-btn";
+                        btn.id = `btn_${actKey}`;
+                        btn.innerText = actInfo.name;
+                        btn.onclick = function() { chuyenAdminSub(`admin_${actInfo.hk}`, `adm_${actKey}`, this); };
+                        btnContainer.appendChild(btn);
+
+                        // Tạo khung chứa bảng tương ứng
+                        const hkContentArea = document.getElementById(`admin_${actInfo.hk}`);
+                        const subDiv = document.createElement("div");
+                        subDiv.className = "admin-hd-subcontent";
+                        subDiv.id = `adm_${actKey}`;
+                        subDiv.innerHTML = `<div class="table-responsive"><table><thead><tr><th>MSSV</th><th>Thời gian</th><th>Xóa</th></tr></thead><tbody id="${actInfo.tableId}"></tbody></table></div>`;
+                        hkContentArea.appendChild(subDiv);
+                    }
+                }
+            });
+
+            // Kích hoạt mặc định nút đầu tiên của mỗi học kỳ nếu có
+            ['admin_hk1', 'admin_hk2', 'admin_hk3'].forEach(hkId => {
+                const container = document.getElementById(hkId);
+                const firstBtn = container.querySelector('.admin-hd-btn');
+                const firstSub = container.querySelector('.admin-hd-subcontent');
+                if (firstBtn && firstSub) {
+                    firstBtn.classList.add('active');
+                    firstSub.classList.add('active');
+                }
+            });
+        }
 
         function chuyenTab(idTab) {
             document.getElementById('tabHoSo').classList.remove('active');
@@ -269,6 +339,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // Load xét duyệt hồ sơ nếu có quyền
         const dataList = document.getElementById("dataList");
         const qHoSo = query(collection(db, "HoSo_BaoMat"), orderBy("thoi_gian", "desc"));
         onSnapshot(qHoSo, (snapshot) => {
@@ -276,7 +347,6 @@
             snapshot.forEach((docSnap) => {
                 const data = docSnap.data();
                 const docId = docSnap.id;
-                
                 const tr = document.createElement("tr");
                 tr.innerHTML = `
                     <td><strong>${data.ho_ten}</strong></td>
@@ -310,7 +380,6 @@
                     const row = e.target.closest('.review-box');
                     const trangThai = row.querySelector('.status-select').value;
                     const lyDo = row.querySelector('.reason-input').value;
-                    
                     try {
                         await updateDoc(doc(db, "HoSo_BaoMat", id), { trang_thai: trangThai, ly_do: lyDo });
                         await updateDoc(doc(db, "HoSo_CongKhai", id), { trang_thai: trangThai, ly_do: lyDo });
@@ -322,6 +391,7 @@
             });
         });
 
+        // Xử lý thêm điểm danh
         const adminDiemDanhForm = document.getElementById("adminDiemDanhForm");
         adminDiemDanhForm.addEventListener("submit", async (e) => {
             e.preventDefault();
@@ -349,6 +419,7 @@
 
         function bindAdminDiemDanh(colName, elementId) {
             const container = document.getElementById(elementId);
+            if (!container) return;
             onSnapshot(query(collection(db, colName), orderBy("thoi_gian", "desc")), (snapshot) => {
                 container.innerHTML = "";
                 snapshot.forEach((docSnap) => {
