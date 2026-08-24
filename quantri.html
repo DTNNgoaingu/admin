@@ -8,7 +8,6 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 50%, #fefce8 100%); color: #2d3748; padding: 30px; min-height: 100vh; }
         
-        /* Giao diện khung đăng nhập mật khẩu admin */
         #loginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 1000; }
         .login-card { background: #ffffff; padding: 40px; border-radius: 30px; box-shadow: 0 15px 40px rgba(0,0,0,0.2); width: 100%; max-width: 400px; text-align: center; border: 3px solid #bbf7d0; }
         .login-card h2 { color: #166534; margin-bottom: 20px; font-size: 1.5rem; font-weight: 900; }
@@ -45,8 +44,8 @@
         .save-eval-btn { padding: 12px 24px; background: linear-gradient(135deg, #15803d 0%, #166534 100%); color: #fef08a; border: none; border-radius: 20px; font-weight: 900; cursor: pointer; font-size: 14px; box-shadow: 0 4px 15px rgba(22, 101, 52, 0.25); }
         .save-eval-btn:hover { background: #166534; }
 
-        .add-dd-box { background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%); padding: 25px; border-radius: 30px; border: 2px solid #bbf7d0; margin-bottom: 25px; display: flex; gap: 15px; align-items: center; }
-        .add-dd-box input, .add-dd-box select { flex: 1; padding: 14px 22px; border-radius: 20px; border: 2px solid #bbf7d0; outline: none; font-size: 15px; background: #fff; font-weight: 700; color: #1f2937; }
+        .add-dd-box { background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%); padding: 25px; border-radius: 30px; border: 2px solid #bbf7d0; margin-bottom: 25px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
+        .add-dd-box select, .add-dd-box input { flex: 1; min-width: 220px; padding: 14px 22px; border-radius: 20px; border: 2px solid #bbf7d0; outline: none; font-size: 15px; background: #fff; font-weight: 700; color: #1f2937; }
         .add-dd-btn { padding: 14px 32px; background: linear-gradient(135deg, #22c55e 0%, #ca8a04 100%); color: #ffffff; border: none; border-radius: 20px; font-weight: 900; cursor: pointer; font-size: 15px; box-shadow: 0 6px 20px rgba(202, 138, 4, 0.4); text-transform: uppercase; }
         .add-dd-btn:hover { transform: scale(1.03); }
         
@@ -56,7 +55,6 @@
 </head>
 <body>
 
-    <!-- Khung nhập mật khẩu bảo mật nội bộ -->
     <div id="loginOverlay">
         <div class="login-card">
             <h2>Đăng nhập Quản trị viên</h2>
@@ -104,49 +102,85 @@
             </div>
         </div>
 
-        <!-- TAB 2: QUẢN LÝ ĐIỂM DANH -->
+        <!-- TAB 2: QUẢN LÝ ĐIỂM DANH THEO HỌC KỲ -->
         <div id="tabDiemDanh" class="tab-content">
-            <h2>Điểm danh nhanh theo hoạt động</h2>
+            <h2>Điểm danh nhanh theo Học kỳ và Hoạt động</h2>
             
             <form id="adminDiemDanhForm" class="add-dd-box">
                 <select id="chonHoatDong" required>
-                    <option value="" disabled selected>-- Chọn hoạt động --</option>
-                    <option value="DiemDanh_HD1">Ngày hội CLB khoa NN</option>
-                    <option value="DiemDanh_HD2">Lễ đón TSV K26</option>
+                    <option value="" disabled selected>-- Chọn hoạt động & Học kỳ --</option>
+                    <optgroup label="Học kỳ 1 (2026 - 2027)">
+                        <option value="DiemDanh_HK1_HD1">Ngày hội CLB khoa NN (HK1)</option>
+                        <option value="DiemDanh_HK1_HD2">Lễ đón TSV K26 (HK1)</option>
+                    </optgroup>
+                    <optgroup label="Học kỳ 2 (2026 - 2027)">
+                        <option value="DiemDanh_HK2_HD1">Hội thao truyền thống (HK2)</option>
+                        <option value="DiemDanh_HK2_HD2">Cuộc thi Hùng biện tiếng Anh (HK2)</option>
+                    </optgroup>
+                    <optgroup label="Học kỳ 3 (2026 - 2027)">
+                        <option value="DiemDanh_HK3_HD1">Tổng kết chiến dịch Mùa hè xanh (HK3)</option>
+                        <option value="DiemDanh_HK3_HD2">Đêm hội văn nghệ khoa (HK3)</option>
+                    </optgroup>
                 </select>
                 <input type="text" id="adminMssv" placeholder="Nhập Mã số sinh viên (MSSV)..." required>
                 <button type="submit" class="add-dd-btn">Thêm điểm danh</button>
             </form>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px;">
+            <div style="display: flex; flex-direction: column; gap: 30px;">
+                <!-- HK1 -->
                 <div>
-                    <h3 style="color: #166534; margin-bottom: 12px; font-size: 1.2rem; font-weight: 900;">Ngày hội CLB khoa NN</h3>
-                    <div class="table-responsive" style="margin-top: 0;">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>MSSV</th>
-                                    <th>Thời gian</th>
-                                    <th>Xóa</th>
-                                </tr>
-                            </thead>
-                            <tbody id="adminListHD1"></tbody>
-                        </table>
+                    <h3 style="color: #166534; margin-bottom: 12px; font-size: 1.3rem; font-weight: 900;">Học kỳ 1 (2026 - 2027)</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div>
+                            <h4 style="color: #15803d; margin-bottom: 8px;">Ngày hội CLB khoa NN</h4>
+                            <div class="table-responsive" style="margin-top: 0;">
+                                <table><thead><tr><th>MSSV</th><th>Thời gian</th><th>Xóa</th></tr></thead><tbody id="adminListHK1_HD1"></tbody></table>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 style="color: #15803d; margin-bottom: 8px;">Lễ đón TSV K26</h4>
+                            <div class="table-responsive" style="margin-top: 0;">
+                                <table><thead><tr><th>MSSV</th><th>Thời gian</th><th>Xóa</th></tr></thead><tbody id="adminListHK1_HD2"></tbody></table>
+                            </div>
+                        </div>
                     </div>
                 </div>
+
+                <!-- HK2 -->
                 <div>
-                    <h3 style="color: #166534; margin-bottom: 12px; font-size: 1.2rem; font-weight: 900;">Lễ đón TSV K26</h3>
-                    <div class="table-responsive" style="margin-top: 0;">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>MSSV</th>
-                                    <th>Thời gian</th>
-                                    <th>Xóa</th>
-                                </tr>
-                            </thead>
-                            <tbody id="adminListHD2"></tbody>
-                        </table>
+                    <h3 style="color: #166534; margin-bottom: 12px; font-size: 1.3rem; font-weight: 900;">Học kỳ 2 (2026 - 2027)</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div>
+                            <h4 style="color: #15803d; margin-bottom: 8px;">Hội thao truyền thống</h4>
+                            <div class="table-responsive" style="margin-top: 0;">
+                                <table><thead><tr><th>MSSV</th><th>Thời gian</th><th>Xóa</th></tr></thead><tbody id="adminListHK2_HD1"></tbody></table>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 style="color: #15803d; margin-bottom: 8px;">Cuộc thi Hùng biện tiếng Anh</h4>
+                            <div class="table-responsive" style="margin-top: 0;">
+                                <table><thead><tr><th>MSSV</th><th>Thời gian</th><th>Xóa</th></tr></thead><tbody id="adminListHK2_HD2"></tbody></table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- HK3 -->
+                <div>
+                    <h3 style="color: #166534; margin-bottom: 12px; font-size: 1.3rem; font-weight: 900;">Học kỳ 3 (2026 - 2027)</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div>
+                            <h4 style="color: #15803d; margin-bottom: 8px;">Tổng kết chiến dịch Mùa hè xanh</h4>
+                            <div class="table-responsive" style="margin-top: 0;">
+                                <table><thead><tr><th>MSSV</th><th>Thời gian</th><th>Xóa</th></tr></thead><tbody id="adminListHK3_HD1"></tbody></table>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 style="color: #15803d; margin-bottom: 8px;">Đêm hội văn nghệ khoa</h4>
+                            <div class="table-responsive" style="margin-top: 0;">
+                                <table><thead><tr><th>MSSV</th><th>Thời gian</th><th>Xóa</th></tr></thead><tbody id="adminListHK3_HD2"></tbody></table>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -154,7 +188,6 @@
     </div>
 
     <script>
-        // Mật khẩu nội bộ quản trị (Bạn có thể đổi chữ 'admin123' thành mật khẩu tùy ý)
         const MAT_KHAU_ADMIN = "admin123";
 
         function kiemTraMatKhau() {
@@ -168,11 +201,8 @@
             }
         }
 
-        // Cho phép nhấn phím Enter để đăng nhập nhanh
         document.getElementById("adminPassword").addEventListener("keypress", function(e) {
-            if (e.key === 'Enter') {
-                kiemTraMatKhau();
-            }
+            if (e.key === 'Enter') { kiemTraMatKhau(); }
         });
 
         function chuyenTab(idTab) {
@@ -281,31 +311,28 @@
             }
         });
 
-        const adminListHD1 = document.getElementById("adminListHD1");
-        onSnapshot(query(collection(db, "DiemDanh_HD1"), orderBy("thoi_gian", "desc")), (snapshot) => {
-            adminListHD1.innerHTML = "";
-            snapshot.forEach((docSnap) => {
-                const data = docSnap.data();
-                const docId = docSnap.id;
-                let thoiGianStr = data.thoi_gian ? data.thoi_gian.toDate().toLocaleTimeString('vi-VN') + " - " + data.thoi_gian.toDate().toLocaleDateString('vi-VN') : "";
-                const tr = document.createElement("tr");
-                tr.innerHTML = `<td><strong>${data.mssv}</strong></td><td>${thoiGianStr}</td><td><button class="delete-btn" onclick="xoaDiemDanh('DiemDanh_HD1', '${docId}')">Xóa</button></td>`;
-                adminListHD1.appendChild(tr);
+        // Hàm helper đổ bảng admin theo học kỳ
+        function bindAdminDiemDanh(colName, elementId) {
+            const container = document.getElementById(elementId);
+            onSnapshot(query(collection(db, colName), orderBy("thoi_gian", "desc")), (snapshot) => {
+                container.innerHTML = "";
+                snapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    const docId = docSnap.id;
+                    let thoiGianStr = data.thoi_gian ? data.thoi_gian.toDate().toLocaleTimeString('vi-VN') + " - " + data.thoi_gian.toDate().toLocaleDateString('vi-VN') : "";
+                    const tr = document.createElement("tr");
+                    tr.innerHTML = `<td><strong>${data.mssv}</strong></td><td>${thoiGianStr}</td><td><button class="delete-btn" onclick="xoaDiemDanh('${colName}', '${docId}')">Xóa</button></td>`;
+                    container.appendChild(tr);
+                });
             });
-        });
+        }
 
-        const adminListHD2 = document.getElementById("adminListHD2");
-        onSnapshot(query(collection(db, "DiemDanh_HD2"), orderBy("thoi_gian", "desc")), (snapshot) => {
-            adminListHD2.innerHTML = "";
-            snapshot.forEach((docSnap) => {
-                const data = docSnap.data();
-                const docId = docSnap.id;
-                let thoiGianStr = data.thoi_gian ? data.thoi_gian.toDate().toLocaleTimeString('vi-VN') + " - " + data.thoi_gian.toDate().toLocaleDateString('vi-VN') : "";
-                const tr = document.createElement("tr");
-                tr.innerHTML = `<td><strong>${data.mssv}</strong></td><td>${thoiGianStr}</td><td><button class="delete-btn" onclick="xoaDiemDanh('DiemDanh_HD2', '${docId}')">Xóa</button></td>`;
-                adminListHD2.appendChild(tr);
-            });
-        });
+        bindAdminDiemDanh("DiemDanh_HK1_HD1", "adminListHK1_HD1");
+        bindAdminDiemDanh("DiemDanh_HK1_HD2", "adminListHK1_HD2");
+        bindAdminDiemDanh("DiemDanh_HK2_HD1", "adminListHK2_HD1");
+        bindAdminDiemDanh("DiemDanh_HK2_HD2", "adminListHK2_HD2");
+        bindAdminDiemDanh("DiemDanh_HK3_HD1", "adminListHK3_HD1");
+        bindAdminDiemDanh("DiemDanh_HK3_HD2", "adminListHK3_HD2");
 
         window.xoaDiemDanh = async function(colName, id) {
             if (confirm("Bạn có chắc chắn muốn xóa sinh viên này?")) {
