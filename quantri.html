@@ -91,7 +91,7 @@
             <button class="tab-btn" onclick="chuyenTab('tabDiemDanh')">Quản lý điểm danh hoạt động</button>
         </div>
 
-        <!-- TAB 1: XÉT DUYỆT HỒ SƠ (Chỉ Đoàn Khoa mới thấy) -->
+        <!-- TAB 1: XÉT DUYỆT HỒ SƠ -->
         <div id="tabHoSo" class="tab-content active">
             <h2>Danh sách hồ sơ ứng tuyển danh hiệu</h2>
             <div class="table-responsive">
@@ -123,7 +123,6 @@
             <form id="adminDiemDanhForm" class="add-dd-box">
                 <select id="chonHoatDong" required>
                     <option value="" disabled selected>-- Chọn hoạt động được phân quyền --</option>
-                    <!-- Các option sẽ được tự động lọc dựa vào quyền tài khoản đăng nhập -->
                 </select>
                 <input type="text" id="adminMssv" placeholder="Nhập Mã số sinh viên (MSSV)..." required>
                 <button type="submit" class="add-dd-btn">Thêm điểm danh</button>
@@ -137,37 +136,24 @@
 
             <!-- ADMIN HK1 -->
             <div id="admin_hk1" class="admin-hocky-content active">
-                <div class="admin-hd-buttons" id="hk1_buttons">
-                    <button class="admin-hd-btn active" onclick="chuyenAdminSub('admin_hk1', 'adm_hk1_hd1', this)">Ngày hội CLB khoa NN</button>
-                    <!-- Các hoạt động riêng của CLB sẽ xuất hiện ở đây nếu có quyền -->
-                </div>
-                <div id="adm_hk1_hd1" class="admin-hd-subcontent active">
-                    <div class="table-responsive">
-                        <table><thead><tr><th>MSSV</th><th>Thời gian</th><th>Xóa</th></tr></thead><tbody id="adminListHK1_HD1"></tbody></table>
-                    </div>
-                </div>
+                <div class="admin-hd-buttons" id="hk1_buttons"></div>
             </div>
 
             <!-- ADMIN HK2 -->
             <div id="admin_hk2" class="admin-hocky-content">
-                <div class="admin-hd-buttons" id="hk2_buttons">
-                    <!-- Hoạt động HK2 -->
-                </div>
+                <div class="admin-hd-buttons" id="hk2_buttons"></div>
             </div>
 
             <!-- ADMIN HK3 -->
             <div id="admin_hk3" class="admin-hocky-content">
-                <div class="admin-hd-buttons" id="hk3_buttons">
-                    <!-- Hoạt động HK3 -->
-                </div>
+                <div class="admin-hd-buttons" id="hk3_buttons"></div>
             </div>
 
         </div>
     </div>
 
     <script>
-        // PHÂN QUYỀN MẬT KHẨU CHO ĐOÀN KHOA VÀ 5 CLB
-        // Cấu trúc: mat_khau: { ten: "...", quyenHoSo: true/false, activities: [...] }
+        // PHÂN QUYỀN MẬT KHẨU: TẤT CẢ 5 CLB ĐỀU CHỈ CÓ "Ngày hội CLB khoa NN" + Hoạt động riêng
         const PHAN_QUYEN = {
             "admin123": {
                 ten: "Đoàn Khoa Ngoại ngữ",
@@ -177,7 +163,7 @@
             "mod2026": {
                 ten: "CLB MOD",
                 quyenHoSo: false,
-                activities: ["DiemDanh_HK1_HD1", "DiemDanh_HK1_HD2"] // Ngày hội CLB + 1 hoạt động riêng
+                activities: ["DiemDanh_HK1_HD1"] // Chỉ Ngày hội CLB khoa NN
             },
             "ec2026": {
                 ten: "CLB English Club (EC)",
@@ -201,7 +187,6 @@
             }
         };
 
-        // Danh sách thông tin toàn bộ các hoạt động hệ thống
         const ALL_ACTIVITIES = {
             "DiemDanh_HK1_HD1": { hk: "hk1", name: "Ngày hội CLB khoa NN", tableId: "adminListHK1_HD1" },
             "DiemDanh_HK1_HD2": { hk: "hk1", name: "Lễ đón TSV K26", tableId: "adminListHK1_HD2" },
@@ -220,13 +205,10 @@
                 document.getElementById("loginOverlay").style.display = "none";
                 document.getElementById("adminContainer").style.display = "block";
                 
-                // Hiển thị tên đơn vị trên banner
                 document.getElementById("bannerTitle").innerText = `Hệ thống Quản trị - ${currentRole.ten}`;
 
-                // Nếu không phải Đoàn khoa thì ẩn tab xét duyệt hồ sơ
                 if (!currentRole.quyenHoSo) {
                     document.getElementById("tabHeaderNav").style.display = "none";
-                    // Chuyển thẳng sang tab điểm danh
                     chuyenTab('tabDiemDanh');
                 }
 
@@ -241,46 +223,37 @@
             if (e.key === 'Enter') { kiemTraMatKhau(); }
         });
 
-        // Tự động dựng giao diện chọn hoạt động dựa vào quyền hạn của tài khoản đăng nhập
         function buildPermissionsUI(allowedActs) {
             const selectEl = document.getElementById("chonHoatDong");
             selectEl.innerHTML = '<option value="" disabled selected>-- Chọn hoạt động được phân quyền --</option>';
 
-            // Xây dựng các select option và các tab subcontent cho từng HK
             allowedActs.forEach(actKey => {
                 const actInfo = ALL_ACTIVITIES[actKey];
                 if (!actInfo) return;
 
-                // Thêm vào dropdown form thêm điểm danh
                 const opt = document.createElement("option");
                 opt.value = actKey;
                 opt.innerText = `${actInfo.name} (${actInfo.hk.toUpperCase()})`;
                 selectEl.appendChild(opt);
 
-                // Dựng giao diện bảng theo từng học kỳ
                 const btnContainer = document.getElementById(`${actInfo.hk}_buttons`);
-                if (btnContainer) {
-                    // Nếu chưa có nút này thì tạo mới
-                    if (!document.getElementById(`btn_${actKey}`)) {
-                        const btn = document.createElement("button");
-                        btn.className = "admin-hd-btn";
-                        btn.id = `btn_${actKey}`;
-                        btn.innerText = actInfo.name;
-                        btn.onclick = function() { chuyenAdminSub(`admin_${actInfo.hk}`, `adm_${actKey}`, this); };
-                        btnContainer.appendChild(btn);
+                if (btnContainer && !document.getElementById(`btn_${actKey}`)) {
+                    const btn = document.createElement("button");
+                    btn.className = "admin-hd-btn";
+                    btn.id = `btn_${actKey}`;
+                    btn.innerText = actInfo.name;
+                    btn.onclick = function() { chuyenAdminSub(`admin_${actInfo.hk}`, `adm_${actKey}`, this); };
+                    btnContainer.appendChild(btn);
 
-                        // Tạo khung chứa bảng tương ứng
-                        const hkContentArea = document.getElementById(`admin_${actInfo.hk}`);
-                        const subDiv = document.createElement("div");
-                        subDiv.className = "admin-hd-subcontent";
-                        subDiv.id = `adm_${actKey}`;
-                        subDiv.innerHTML = `<div class="table-responsive"><table><thead><tr><th>MSSV</th><th>Thời gian</th><th>Xóa</th></tr></thead><tbody id="${actInfo.tableId}"></tbody></table></div>`;
-                        hkContentArea.appendChild(subDiv);
-                    }
+                    const hkContentArea = document.getElementById(`admin_${actInfo.hk}`);
+                    const subDiv = document.createElement("div");
+                    subDiv.className = "admin-hd-subcontent";
+                    subDiv.id = `adm_${actKey}`;
+                    subDiv.innerHTML = `<div class="table-responsive"><table><thead><tr><th>MSSV</th><th>Thời gian</th><th>Xóa</th></tr></thead><tbody id="${actInfo.tableId}"></tbody></table></div>`;
+                    hkContentArea.appendChild(subDiv);
                 }
             });
 
-            // Kích hoạt mặc định nút đầu tiên của mỗi học kỳ nếu có
             ['admin_hk1', 'admin_hk2', 'admin_hk3'].forEach(hkId => {
                 const container = document.getElementById(hkId);
                 const firstBtn = container.querySelector('.admin-hd-btn');
@@ -339,10 +312,10 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Load xét duyệt hồ sơ nếu có quyền
         const dataList = document.getElementById("dataList");
         const qHoSo = query(collection(db, "HoSo_BaoMat"), orderBy("thoi_gian", "desc"));
         onSnapshot(qHoSo, (snapshot) => {
+            if (!dataList) return;
             dataList.innerHTML = "";
             snapshot.forEach((docSnap) => {
                 const data = docSnap.data();
@@ -391,7 +364,6 @@
             });
         });
 
-        // Xử lý thêm điểm danh
         const adminDiemDanhForm = document.getElementById("adminDiemDanhForm");
         adminDiemDanhForm.addEventListener("submit", async (e) => {
             e.preventDefault();
