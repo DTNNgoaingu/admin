@@ -3,58 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý Hồ sơ | FFl Admin</title>
+    <title>Quản lý Hệ thống | FFL Admin</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4fbf5; color: #2e3d32; padding: 20px; }
-        .container { max-width: 1400px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 40px; box-shadow: 0 8px 24px rgba(0,0,0,0.06); }
-        h2 { color: #2e7d32; margin-bottom: 25px; border-bottom: 4px solid #ffca28; display: inline-block; padding-bottom: 8px; }
-        .table-responsive { width: 100%; overflow-x: auto; border-radius: 20px; border: 2px solid #e8f5e9; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #e8f5e9 0%, #f4fbf5 100%); color: #2e3d32; padding: 30px; min-height: 100vh; }
+        .container { max-width: 1400px; margin: 0 auto; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); padding: 40px; border-radius: 40px; box-shadow: 0 20px 40px rgba(46, 125, 50, 0.1); border: 1px solid rgba(255, 255, 255, 0.9); }
+        
+        .tab-header { display: flex; gap: 15px; margin-bottom: 30px; border-bottom: 2px solid #e8f5e9; padding-bottom: 15px; }
+        .tab-btn { padding: 14px 28px; background: #e8f5e9; color: #2e7d32; border: none; border-radius: 30px; font-weight: 800; font-size: 16px; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 12px rgba(46,125,50,0.05); }
+        .tab-btn.active { background: #2e7d32; color: #fff; box-shadow: 0 8px 20px rgba(46, 125, 50, 0.25); transform: translateY(-2px); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        h2 { color: #2e7d32; margin-bottom: 25px; border-bottom: 4px solid #ffca28; display: inline-block; padding-bottom: 8px; font-size: 1.6rem; }
+        .table-responsive { width: 100%; overflow-x: auto; border-radius: 25px; border: 2px solid #e8f5e9; margin-top: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.02); }
         table { width: 100%; border-collapse: collapse; white-space: nowrap; }
-        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #e8f5e9; font-size: 14px; }
-        th { background-color: #2e7d32; color: #fff; font-weight: bold; }
+        th, td { padding: 18px 20px; text-align: left; border-bottom: 1px solid #e8f5e9; font-size: 14px; }
+        th { background-color: #2e7d32; color: #fff; font-weight: 700; }
         tr:last-child td { border-bottom: none; }
         tr:hover td { background-color: #f4fbf5; }
-        .mini-btn { padding: 6px 14px; background: #ffca28; color: #1b5e20; text-decoration: none; border-radius: 20px; font-weight: bold; font-size: 12px; display: inline-block; }
-        .mini-btn:hover { background: #ffb300; }
+        
+        .mini-btn { padding: 8px 16px; background: linear-gradient(135deg, #ffca28 0%, #ffb300 100%); color: #1b5e20; text-decoration: none; border-radius: 20px; font-weight: 800; font-size: 12px; display: inline-block; box-shadow: 0 2px 8px rgba(255,202,40,0.3); }
+        .mini-btn:hover { transform: scale(1.05); }
+        
         .review-box { display: flex; gap: 10px; align-items: center; }
-        select, input[type="text"] { padding: 8px 12px; border-radius: 20px; border: 2px solid #e8f5e9; outline: none; font-size: 13px; background: #f9fdf9; }
-        select:focus, input[type="text"]:focus { border-color: #81c784; }
-        .save-eval-btn { padding: 8px 16px; background: #2e7d32; color: white; border: none; border-radius: 20px; font-weight: bold; cursor: pointer; font-size: 13px; }
-        .save-eval-btn:hover { background: #1b5e20; }
+        select, input[type="text"] { padding: 10px 16px; border-radius: 20px; border: 2px solid #e8f5e9; outline: none; font-size: 13px; background: #fcfdfc; transition: all 0.3s; }
+        select:focus, input[type="text"]:focus { border-color: #81c784; background: #fff; box-shadow: 0 0 0 3px rgba(129,199,132,0.15); }
+        
+        .save-eval-btn { padding: 10px 20px; background: #2e7d32; color: white; border: none; border-radius: 20px; font-weight: 800; cursor: pointer; font-size: 13px; box-shadow: 0 4px 12px rgba(46,125,50,0.2); }
+        .save-eval-btn:hover { background: #1b5e20; transform: translateY(-1px); }
+
+        .add-dd-box { background: #f4fbf5; padding: 25px; border-radius: 30px; border: 2px solid #e8f5e9; margin-bottom: 30px; display: flex; gap: 15px; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.02); }
+        .add-dd-box input, .add-dd-box select { flex: 1; padding: 14px 22px; border-radius: 20px; border: 2px solid #e8f5e9; outline: none; font-size: 15px; background: #fff; }
+        .add-dd-btn { padding: 14px 30px; background: linear-gradient(135deg, #ffca28 0%, #ffb300 100%); color: #1b5e20; border: none; border-radius: 20px; font-weight: 800; cursor: pointer; font-size: 15px; box-shadow: 0 4px 15px rgba(255,202,40,0.3); }
+        .add-dd-btn:hover { transform: scale(1.03); }
+        
+        .delete-btn { padding: 8px 16px; background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; border-radius: 20px; font-weight: 800; cursor: pointer; font-size: 12px; }
+        .delete-btn:hover { background: #ffcdd2; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h2>Quản lý và Xét duyệt hồ sơ Khoa</h2>
-        <div class="table-responsive">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Họ tên</th>
-                        <th>MSSV</th>
-                        <th>Lớp</th>
-                        <th>SĐT</th>
-                        <th>Ngành học</th>
-                        <th>Địa chỉ</th>
-                        <th>Email</th>
-                        <th>Chức vụ</th>
-                        <th>Danh hiệu</th>
-                        <th>Minh chứng</th>
-                        <th>Tình hình xét duyệt & Lý do</th>
-                    </tr>
-                </thead>
-                <tbody id="dataList">
-                    <!-- Dữ liệu tự động đổ về từ hệ thống -->
-                </tbody>
-            </table>
+        <div class="tab-header">
+            <button class="tab-btn active" onclick="chuyenTab('tabHoSo')">Xét duyệt hồ sơ</button>
+            <button class="tab-btn" onclick="chuyenTab('tabDiemDanh')">Quản lý điểm danh</button>
+        </div>
+
+        <!-- TAB 1: XÉT DUYỆT HỒ SƠ -->
+        <div id="tabHoSo" class="tab-content active">
+            <h2>Quản lý và Xét duyệt hồ sơ Khoa</h2>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Họ tên</th>
+                            <th>MSSV</th>
+                            <th>Lớp</th>
+                            <th>SĐT</th>
+                            <th>Ngành học</th>
+                            <th>Địa chỉ</th>
+                            <th>Email</th>
+                            <th>Chức vụ</th>
+                            <th>Danh hiệu</th>
+                            <th>Minh chứng</th>
+                            <th>Tình hình xét duyệt & Lý do</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dataList"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB 2: QUẢN LÝ ĐIỂM DANH -->
+        <div id="tabDiemDanh" class="tab-content">
+            <h2>Điểm danh nhanh theo hoạt động</h2>
+            
+            <form id="adminDiemDanhForm" class="add-dd-box">
+                <select id="chonHoatDong" required>
+                    <option value="" disabled selected>-- Chọn hoạt động --</option>
+                    <option value="DiemDanh_HD1">Ngày hội CLB khoa NN</option>
+                    <option value="DiemDanh_HD2">Lễ đón TSV K26</option>
+                </select>
+                <input type="text" id="adminMssv" placeholder="Nhập Mã số sinh viên (MSSV)..." required>
+                <button type="submit" class="add-dd-btn">Thêm điểm danh</button>
+            </form>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px;">
+                <div>
+                    <h3 style="color: #2e7d32; margin-bottom: 12px; font-size: 1.2rem;">Ngày hội CLB khoa NN</h3>
+                    <div class="table-responsive" style="margin-top: 0;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>MSSV</th>
+                                    <th>Thời gian</th>
+                                    <th>Xóa</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminListHD1"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div>
+                    <h3 style="color: #2e7d32; margin-bottom: 12px; font-size: 1.2rem;">Lễ đón TSV K26</h3>
+                    <div class="table-responsive" style="margin-top: 0;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>MSSV</th>
+                                    <th>Thời gian</th>
+                                    <th>Xóa</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminListHD2"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
+    <script>
+        function chuyenTab(idTab) {
+            document.getElementById('tabHoSo').classList.remove('active');
+            document.getElementById('tabDiemDanh').classList.remove('active');
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(idTab).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+    </script>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, query, orderBy, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, query, orderBy, doc, updateDoc, addDoc, deleteDoc, getDocs, where } 
+        from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyD3VeuDPJz4iW8JWHBmz5sm-1SdFj-Nn4M",
@@ -68,10 +152,10 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const dataList = document.getElementById("dataList");
 
-        const q = query(collection(db, "HoSo_BaoMat"), orderBy("thoi_gian", "desc"));
-        onSnapshot(q, (snapshot) => {
+        const dataList = document.getElementById("dataList");
+        const qHoSo = query(collection(db, "HoSo_BaoMat"), orderBy("thoi_gian", "desc"));
+        onSnapshot(qHoSo, (snapshot) => {
             dataList.innerHTML = "";
             snapshot.forEach((docSnap) => {
                 const data = docSnap.data();
@@ -112,20 +196,72 @@
                     const lyDo = row.querySelector('.reason-input').value;
                     
                     try {
-                        const docRefBaoMat = doc(db, "HoSo_BaoMat", id);
-                        await updateDoc(docRefBaoMat, { trang_thai: trangThai, ly_do: lyDo });
-
-                        const docRefCongKhai = doc(db, "HoSo_CongKhai", id);
-                        await updateDoc(docRefCongKhai, { trang_thai: trangThai, ly_do: lyDo });
-
+                        await updateDoc(doc(db, "HoSo_BaoMat", id), { trang_thai: trangThai, ly_do: lyDo });
+                        await updateDoc(doc(db, "HoSo_CongKhai", id), { trang_thai: trangThai, ly_do: lyDo });
                         alert("Đã lưu và đồng bộ thành công!");
                     } catch (error) {
-                        console.error("Lỗi cập nhật: ", error);
                         alert("Không thể lưu. Vui lòng kiểm tra lại kết nối.");
                     }
                 });
             });
         });
+
+        const adminDiemDanhForm = document.getElementById("adminDiemDanhForm");
+        adminDiemDanhForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const collectionName = document.getElementById("chonHoatDong").value;
+            const mssvInput = document.getElementById("adminMssv").value.trim();
+
+            const checkQuery = query(collection(db, collectionName), where("mssv", "==", mssvInput));
+            const snapshot = await getDocs(checkQuery);
+            if (!snapshot.empty) {
+                alert("Mã số sinh viên này đã có trong danh sách của hoạt động này rồi!");
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, collectionName), {
+                    mssv: mssvInput,
+                    thoi_gian: new Date()
+                });
+                document.getElementById("adminMssv").value = "";
+                alert("Thêm điểm danh thành công!");
+            } catch (error) {
+                alert("Lỗi kết nối hệ thống.");
+            }
+        });
+
+        const adminListHD1 = document.getElementById("adminListHD1");
+        onSnapshot(query(collection(db, "DiemDanh_HD1"), orderBy("thoi_gian", "desc")), (snapshot) => {
+            adminListHD1.innerHTML = "";
+            snapshot.forEach((docSnap) => {
+                const data = docSnap.data();
+                const docId = docSnap.id;
+                let thoiGianStr = data.thoi_gian ? data.thoi_gian.toDate().toLocaleTimeString('vi-VN') + " - " + data.thoi_gian.toDate().toLocaleDateString('vi-VN') : "";
+                const tr = document.createElement("tr");
+                tr.innerHTML = `<td><strong>${data.mssv}</strong></td><td>${thoiGianStr}</td><td><button class="delete-btn" onclick="xoaDiemDanh('DiemDanh_HD1', '${docId}')">Xóa</button></td>`;
+                adminListHD1.appendChild(tr);
+            });
+        });
+
+        const adminListHD2 = document.getElementById("adminListHD2");
+        onSnapshot(query(collection(db, "DiemDanh_HD2"), orderBy("thoi_gian", "desc")), (snapshot) => {
+            adminListHD2.innerHTML = "";
+            snapshot.forEach((docSnap) => {
+                const data = docSnap.data();
+                const docId = docSnap.id;
+                let thoiGianStr = data.thoi_gian ? data.thoi_gian.toDate().toLocaleTimeString('vi-VN') + " - " + data.thoi_gian.toDate().toLocaleDateString('vi-VN') : "";
+                const tr = document.createElement("tr");
+                tr.innerHTML = `<td><strong>${data.mssv}</strong></td><td>${thoiGianStr}</td><td><button class="delete-btn" onclick="xoaDiemDanh('DiemDanh_HD2', '${docId}')">Xóa</button></td>`;
+                adminListHD2.appendChild(tr);
+            });
+        });
+
+        window.xoaDiemDanh = async function(colName, id) {
+            if (confirm("Bạn có chắc chắn muốn xóa sinh viên này?")) {
+                await deleteDoc(doc(db, colName, id));
+            }
+        }
     </script>
 </body>
 </html>
