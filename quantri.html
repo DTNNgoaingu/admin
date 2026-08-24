@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ thống Quản trị | FFL Admin & Clubs</title>
+    <title>Hệ thống Quản trị | Đoàn - Hội khoa Ngoại ngữ</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 50%, #fefce8 100%); color: #2d3748; padding: 30px; min-height: 100vh; }
         
         #loginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 1000; }
-        .login-card { background: #ffffff; padding: 40px; border-radius: 30px; box-shadow: 0 15px 40px rgba(0,0,0,0.2); width: 100%; max-width: 400px; text-align: center; border: 3px solid #bbf7d0; }
+        .login-card { background: #ffffff; padding: 40px; border-radius: 30px; box-shadow: 0 15px 40px rgba(0,0,0,0.2); width: 100%; max-width: 420px; text-align: center; border: 3px solid #bbf7d0; }
         .login-card h2 { color: #166534; margin-bottom: 10px; font-size: 1.5rem; font-weight: 900; }
-        .login-card p { margin-bottom: 20px; font-size: 0.88rem; color: #555; }
+        .login-card p { margin-bottom: 20px; font-size: 0.88rem; color: #555; line-height: 1.5; }
         .login-card input { width: 100%; padding: 14px 20px; border-radius: 20px; border: 2px solid #bbf7d0; outline: none; margin-bottom: 20px; font-size: 15px; text-align: center; font-weight: 700; background: #fafdfa; }
         .login-card button { width: 100%; padding: 14px; background: linear-gradient(135deg, #15803d 0%, #ca8a04 100%); color: #fff; border: none; border-radius: 20px; font-weight: 900; font-size: 15px; cursor: pointer; box-shadow: 0 4px 15px rgba(22, 101, 52, 0.3); text-transform: uppercase; }
 
@@ -71,7 +71,7 @@
     <div id="loginOverlay">
         <div class="login-card">
             <h2>Đăng nhập Quản trị</h2>
-            <p>Dành cho Đoàn Khoa & Ban Chủ nhiệm 5 CLB:<br><strong>MOD, EC, FFLC, Media, FMCC</strong></p>
+            <p>Dành cho Đoàn - Hội khoa Ngoại ngữ & Các Câu lạc bộ:<br><strong>CLB Tiếng Anh - EC, CLB Truyền thông - FFL Media, CLB Văn nghệ - MOD, CLB 5 Tốt Đồng hành - FMCC, CLB Cộng tác viên - FFLC</strong></p>
             <input type="password" id="adminPassword" placeholder="Nhập mật khẩu truy cập..." autofocus>
             <button onclick="kiemTraMatKhau()">Đăng nhập</button>
         </div>
@@ -80,8 +80,8 @@
     <div class="container" id="adminContainer">
         <div class="admin-banner">
             <div>
-                <h1 id="bannerTitle">Hệ thống Quản trị & Điều hành FFL</h1>
-                <p id="bannerSub">Khoa Ngoại ngữ - Đại học Sài Gòn</p>
+                <h1 id="bannerTitle">Hệ thống Quản trị & Điều hành</h1>
+                <p id="bannerSub">Đoàn - Hội khoa Ngoại ngữ - Đại học Sài Gòn</p>
             </div>
         </div>
 
@@ -154,16 +154,16 @@
     </div>
 
     <script>
-        // PHÂN QUYỀN TÀI KHOẢN CHI TIẾT
+        // CHUẨN HÓA PHÂN QUYỀN VÀ TÊN GỌI CHÍNH XÁC
         const PHAN_QUYEN = {
-            "bt2026": { ten: "Bí thư Đoàn Khoa", quyenHoSo: true, quyenXoa: true, suKienPhuTrach: "ALL" },
-            "lcht2026": { ten: "Liên Chi hội Trưởng", quyenHoSo: true, quyenXoa: true, suKienPhuTrach: "ALL" },
+            "bt2026": { ten: "Bí thư Đoàn khoa", quyenHoSo: true, quyenXoa: true, suKienPhuTrach: "ALL" },
+            "lcht2026": { ten: "Liên Chi hội Trưởng Liên Chi hội Sinh viên khoa", quyenHoSo: true, quyenXoa: true, suKienPhuTrach: "ALL" },
             "admin123": { ten: "Quản trị viên (Admin)", quyenHoSo: true, quyenXoa: false, suKienPhuTrach: "ALL" },
-            "mod2026": { ten: "CLB MOD", quyenHoSo: false, quyenXoa: false, suKienPhuTrach: ["Workshop Làm đồ dân gian"] },
-            "ec2026": { ten: "CLB English Club (EC)", quyenHoSo: false, quyenXoa: false, suKienPhuTrach: ["Ngày hội CLB khoa NN"] },
-            "fflc2026": { ten: "CLB FFLC", quyenHoSo: false, quyenXoa: false, suKienPhuTrach: ["Lễ đón TSV K26"] },
-            "media2026": { ten: "CLB Media", quyenHoSo: false, quyenXoa: false, suKienPhuTrach: ["Hội thao truyền thống"] },
-            "fmcc2026": { ten: "CLB FMCC", quyenHoSo: false, quyenXoa: false, suKienPhuTrach: ["Cuộc thi Hùng biện tiếng Anh"] }
+            "mod2026": { ten: "CLB Văn nghệ - MOD", quyenHoSo: false, quyenXoa: false, suKienPhuTrach: ["Workshop Làm đồ dân gian"] },
+            "ec2026": { ten: "CLB Tiếng Anh - EC", quyenHoSo: false, quyenXoa: false, suKienPhuTrach: ["Ngày hội CLB khoa NN"] },
+            "fflc2026": { ten: "CLB Cộng tác viên - FFLC", quyenHoSo: false, quyenXoa: false, suKienPhuTrach: ["Lễ đón TSV K26"] },
+            "media2026": { ten: "CLB Truyền thông - FFL Media", quyenHoSo: false, quyenXoa: false, suKienPhuTrach: ["Hội thao truyền thống"] },
+            "fmcc2026": { ten: "CLB 5 Tốt Đồng hành - FMCC", quyenHoSo: false, quyenXoa: false, suKienPhuTrach: ["Cuộc thi Hùng biện tiếng Anh"] }
         };
 
         let currentRole = null;
@@ -183,10 +183,8 @@
             
             let danhSachHienThi = [];
             if (currentRole && currentRole.suKienPhuTrach !== "ALL") {
-                // Nếu là CLB, chỉ nạp những sự kiện được phân quyền
                 danhSachHienThi = currentRole.suKienPhuTrach;
             } else {
-                // Nếu là Bí thư, LCHT hoặc admin123, nạp toàn bộ sự kiện của học kỳ đang chọn
                 danhSachHienThi = SU_KIEN_THEO_HK[currentHkSelected] || [];
             }
 
@@ -496,7 +494,6 @@
                 return;
             }
 
-            // Kiểm tra phân quyền sự kiện cho tài khoản CLB
             if (currentRole && currentRole.suKienPhuTrach !== "ALL") {
                 if (!currentRole.suKienPhuTrach.includes(suKienName)) {
                     alert("Bạn không có quyền điểm danh cho sự kiện này!");
