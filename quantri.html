@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hệ thống Quản trị | Đoàn - Hội khoa Ngoại ngữ</title>
-    <!-- Thêm thư viện Quagga2 để quét mã vạch / QR qua camera -->
+    <!-- Thư viện Quagga2 để quét mã vạch / QR qua camera -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -41,8 +41,8 @@
         .mini-btn:hover { transform: scale(1.05); }
         
         .review-box { display: flex; gap: 12px; align-items: center; }
-        select, input[type="text"] { padding: 12px 18px; border-radius: 20px; border: 2px solid #bbf7d0; outline: none; font-size: 14px; background: #fafdfa; font-weight: 700; color: #1f2937; }
-        select:focus, input[type="text"]:focus { border-color: #22c55e; background: #fff; box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.15); }
+        select, input[type="text"], input[type="number"] { padding: 12px 18px; border-radius: 20px; border: 2px solid #bbf7d0; outline: none; font-size: 14px; background: #fafdfa; font-weight: 700; color: #1f2937; }
+        select:focus, input[type="text"]:focus, input[type="number"]:focus { border-color: #22c55e; background: #fff; box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.15); }
         
         .save-eval-btn { padding: 12px 24px; background: linear-gradient(135deg, #15803d 0%, #166534 100%); color: #fef08a; border: none; border-radius: 20px; font-weight: 900; cursor: pointer; font-size: 14px; box-shadow: 0 4px 15px rgba(22, 101, 52, 0.25); }
         .save-eval-btn:hover { background: #166534; }
@@ -50,9 +50,14 @@
         .add-dd-box { background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%); padding: 25px; border-radius: 30px; border: 2px solid #bbf7d0; margin-bottom: 25px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
         .add-dd-box select, .add-dd-box input { flex: 1; min-width: 220px; padding: 14px 22px; border-radius: 20px; border: 2px solid #bbf7d0; outline: none; font-size: 15px; background: #fff; font-weight: 700; color: #1f2937; }
         
-        /* Container cho phần input MSSV kèm nút quét camera */
         .input-scan-group { flex: 1; min-width: 260px; display: flex; gap: 8px; align-items: center; }
         .input-scan-group input { flex: 1; min-width: 140px; margin: 0; }
+
+        /* Khung thiết lập giới hạn sự kiện */
+        .limit-config-box { display: flex; gap: 10px; align-items: center; width: 100%; background: #fefce8; padding: 15px 20px; border-radius: 20px; border: 2px dashed #eab308; margin-bottom: 15px; }
+        .limit-config-box input { width: 140px; padding: 10px 15px; border-radius: 15px; border: 2px solid #fde047; text-align: center; }
+        .limit-btn { padding: 10px 20px; background: linear-gradient(135deg, #ca8a04 0%, #a16207 100%); color: #fff; border: none; border-radius: 15px; font-weight: 900; font-size: 13px; cursor: pointer; box-shadow: 0 4px 12px rgba(202, 138, 4, 0.3); }
+        .limit-btn:hover { transform: scale(1.03); }
 
         .scan-btn { padding: 14px 18px; background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color: #ffffff; border: none; border-radius: 20px; font-weight: 900; cursor: pointer; font-size: 14px; box-shadow: 0 4px 15px rgba(2, 132, 199, 0.3); display: flex; align-items: center; gap: 6px; white-space: nowrap; }
         .scan-btn:hover { transform: scale(1.03); }
@@ -146,6 +151,14 @@
                 <button class="hk-btn" onclick="chuyenHocKyAdmin('hk3', this)">Học kỳ 3 (2026 - 2027)</button>
             </div>
 
+            <!-- Khung thiết lập số lượng tối đa cho sự kiện đang chọn -->
+            <div class="limit-config-box">
+                <span style="font-weight: 900; color: #854d0e; font-size: 14px;">⚙️ Giới hạn số lượng tối đa:</span>
+                <input type="number" id="inputGioiHanSoLuong" min="1" placeholder="Số lượng...">
+                <button type="button" class="limit-btn" onclick="luuGioiHanSuKien()">Lưu giới hạn</button>
+                <span id="thongTinSoLuongHienTai" style="font-size: 13px; font-weight: 700; color: #166534; margin-left: auto;"></span>
+            </div>
+
             <!-- Khung thao tác Check-in nhanh kèm nút Quét MSSV -->
             <form id="adminDiemDanhForm" class="add-dd-box">
                 <select id="chonHoatDong" required>
@@ -204,6 +217,7 @@
         let globalAdminSnapshot = null;
         let currentHkSelected = "hk1";
         let isScannerRunning = false;
+        let danhSachGioiHanSuKien = {}; // Lưu giới hạn số lượng cho từng sự kiện
 
         const SU_KIEN_THEO_HK = {
             "hk1": ["Workshop Làm đồ dân gian", "Ngày hội CLB khoa NN", "Lễ đón TSV K26"],
@@ -232,9 +246,18 @@
             if (danhSachHienThi.length > 0) {
                 selectSk.value = danhSachHienThi[0];
                 document.getElementById("tieuDeBangQuanLy").innerText = `Danh sách: ${danhSachHienThi[0]}`;
+                capNhatHienThiGioiHan(danhSachHienThi[0]);
             } else {
                 document.getElementById("tieuDeBangQuanLy").innerText = `Danh sách: (Không có sự kiện được phân quyền ở học kỳ này)`;
+                document.getElementById("inputGioiHanSoLuong").value = "";
+                document.getElementById("thongTinSoLuongHienTai").innerText = "";
             }
+        }
+
+        function capNhatHienThiGioiHan(tenSuKien) {
+            const inputVal = document.getElementById("inputGioiHanSoLuong");
+            const limit = danhSachGioiHanSuKien[tenSuKien] || "";
+            inputVal.value = limit !== "" ? limit : "";
         }
 
         function kiemTraMatKhau() {
@@ -278,9 +301,28 @@
         }
 
         document.getElementById("chonHoatDong").addEventListener("change", function(e) {
-            document.getElementById("tieuDeBangQuanLy").innerText = `Danh sách: ${e.target.value}`;
+            const skName = e.target.value;
+            document.getElementById("tieuDeBangQuanLy").innerText = `Danh sách: ${skName}`;
+            capNhatHienThiGioiHan(skName);
             if (typeof window.triggerRender === 'function') window.triggerRender();
         });
+
+        // Hàm lưu giới hạn số lượng cho sự kiện
+        window.luuGioiHanSuKien = function() {
+            const selectedSk = document.getElementById("chonHoatDong").value;
+            if (!selectedSk) {
+                alert("Vui lòng chọn sự kiện trước khi đặt giới hạn!");
+                return;
+            }
+            const val = document.getElementById("inputGioiHanSoLuong").value.trim();
+            if (val === "" || parseInt(val) <= 0) {
+                alert("Vui lòng nhập một số lượng hợp lệ lớn hơn 0!");
+                return;
+            }
+            danhSachGioiHanSuKien[selectedSk] = parseInt(val);
+            alert(`Đã đặt giới hạn tối đa ${val} sinh viên cho sự kiện "${selectedSk}" thành công!`);
+            if (typeof window.triggerRender === 'function') window.triggerRender();
+        }
 
         // Tích hợp chức năng Quagga2 Quét Mã vạch / QR qua Camera
         function batDauQuetCamera() {
@@ -293,7 +335,7 @@
                     type: "LiveStream",
                     target: document.querySelector('#interactive'),
                     constraints: {
-                        facingMode: "environment" // Ưu tiên camera sau
+                        facingMode: "environment"
                     }
                 },
                 decoder: {
@@ -434,6 +476,17 @@
 
             const hkRegs = regDataList.filter(item => item.su_kien === selectedSk);
             const hkCheckins = checkinDataList.filter(item => item.su_kien === selectedSk);
+
+            // Hiển thị thống kê số lượng đã check-in so với giới hạn
+            const maxLimit = window.danhSachGioiHanSuKien ? window.danhSachGioiHanSuKien[selectedSk] : null;
+            const infoText = document.getElementById("thongTinSoLuongHienTai");
+            if (infoText) {
+                if (maxLimit) {
+                    infoText.innerText = `Đã tham gia: ${hkCheckins.length} / ${maxLimit} sinh viên`;
+                } else {
+                    infoText.innerText = `Đã tham gia: ${hkCheckins.length} sinh viên (Chưa đặt giới hạn)`;
+                }
+            }
 
             const mssvMap = new Map();
 
@@ -587,9 +640,20 @@
 
             try {
                 const checkQ = query(collection(db, "DiemDanh_SuKien"), where("mssv", "==", mssvInput), where("su_kien", "==", suKienName));
-                if (!(await getDocs(checkQ)).empty) {
+                const checkSnap = await getDocs(checkQ);
+                if (!checkSnap.empty) {
                     alert("Sinh viên này đã check-in sự kiện này rồi!");
                     return;
+                }
+
+                // Kiểm tra giới hạn số lượng tối đa nếu có thiết lập
+                const maxLimit = window.danhSachGioiHanSuKien ? window.danhSachGioiHanSuKien[suKienName] : null;
+                if (maxLimit) {
+                    const currentCheckinCount = checkinDataList.filter(item => item.su_kien === suKienName).length;
+                    if (currentCheckinCount >= maxLimit) {
+                        alert(`Sự kiện này đã đạt số lượng tối đa cho phép (${maxLimit} sinh viên). Không thể check-in thêm!`);
+                        return;
+                    }
                 }
 
                 const regQ = query(collection(db, "DangKy_SuKien"), where("mssv", "==", mssvInput), where("su_kien", "==", suKienName));
