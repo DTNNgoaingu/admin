@@ -3,12 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý Hệ thống | FFL Admin</title>
+    <title>Hệ thống Quản trị | FFL Admin</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 50%, #fefce8 100%); color: #2d3748; padding: 30px; min-height: 100vh; }
         .container { max-width: 1400px; margin: 0 auto; background: #ffffff; padding: 45px; border-radius: 35px; box-shadow: 0 10px 30px rgba(22, 101, 52, 0.08); border: 3px solid #bbf7d0; }
         
+        .admin-banner { background: linear-gradient(135deg, #15803d 0%, #22c55e 50%, #eab308 100%); color: white; padding: 25px 35px; border-radius: 25px; margin-bottom: 30px; box-shadow: 0 8px 25px rgba(22, 101, 52, 0.2); display: flex; justify-content: space-between; align-items: center; }
+        .admin-banner h1 { font-size: 1.8rem; font-weight: 900; text-shadow: 0 2px 4px rgba(0,0,0,0.15); }
+        .admin-banner p { font-size: 1rem; color: #fef08a; font-weight: 700; }
+
         .tab-header { display: flex; gap: 15px; margin-bottom: 25px; border-bottom: 3px solid #bbf7d0; padding-bottom: 15px; }
         .tab-btn { padding: 14px 30px; background: #f0fdf4; color: #166534; border: 2px solid #bbf7d0; border-radius: 25px; font-weight: 900; font-size: 15px; cursor: pointer; transition: all 0.3s; }
         .tab-btn.active { background: linear-gradient(135deg, #15803d 0%, #ca8a04 100%); color: #fff; border-color: transparent; box-shadow: 0 6px 20px rgba(22, 101, 52, 0.3); }
@@ -19,7 +23,7 @@
         .table-responsive { width: 100%; overflow-x: auto; border-radius: 25px; border: 2px solid #bbf7d0; margin-top: 20px; }
         table { width: 100%; border-collapse: collapse; white-space: nowrap; }
         th, td { padding: 20px; text-align: left; border-bottom: 1px solid #e5e7eb; font-size: 15px; }
-        th { background: linear-gradient(135deg, #15803d 0%, #166534 100%); color: #fef08a; font-weight: 900; text-transform: uppercase; }
+        th { background: linear-gradient(135deg, #15803d 0%, #166534 100%); color: #fef08a; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; }
         tr:last-child td { border-bottom: none; }
         tr:hover td { background-color: #f0fdf4; }
         
@@ -45,14 +49,22 @@
 <body>
 
     <div class="container">
+        <!-- Banner tiêu đề chuẩn chỉnh cho trang Quản trị -->
+        <div class="admin-banner">
+            <div>
+                <h1>Hệ thống Quản trị & Điều hành FFL</h1>
+                <p>Khoa Ngoại ngữ - Đại học Sài Gòn</p>
+            </div>
+        </div>
+
         <div class="tab-header">
-            <button class="tab-btn active" onclick="chuyenTab('tabHoSo')">Xét duyệt hồ sơ</button>
-            <button class="tab-btn" onclick="chuyenTab('tabDiemDanh')">Quản lý điểm danh</button>
+            <button class="tab-btn active" onclick="chuyenTab('tabHoSo')">Xét duyệt hồ sơ danh hiệu</button>
+            <button class="tab-btn" onclick="chuyenTab('tabDiemDanh')">Quản lý điểm danh hoạt động</button>
         </div>
 
         <!-- TAB 1: XÉT DUYỆT HỒ SƠ -->
         <div id="tabHoSo" class="tab-content active">
-            <h2>Quản lý và Xét duyệt hồ sơ Khoa</h2>
+            <h2>Danh sách hồ sơ ứng tuyển danh hiệu</h2>
             <div class="table-responsive">
                 <table>
                     <thead>
