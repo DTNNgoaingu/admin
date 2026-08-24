@@ -57,12 +57,9 @@
         .filter-btn { flex: 1; padding: 12px 20px; background: #f0fdf4; color: #166534; border: 2px solid #bbf7d0; border-radius: 20px; font-weight: 900; cursor: pointer; transition: all 0.3s; text-align: center; }
         .filter-btn.active { background: linear-gradient(135deg, #15803d 0%, #ca8a04 100%); color: #fff; border-color: transparent; box-shadow: 0 4px 15px rgba(22, 101, 52, 0.25); }
 
-        .admin-hocky-tabs { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; background: #f0fdf4; padding: 10px; border-radius: 25px; border: 2px solid #bbf7d0; }
-        .admin-hk-btn { flex: 1; min-width: 180px; padding: 14px 20px; background: #ffffff; color: #166534; border: 2px solid #bbf7d0; border-radius: 18px; font-weight: 900; font-size: 0.95rem; cursor: pointer; transition: all 0.3s; text-align: center; }
-        .admin-hk-btn.active { background: linear-gradient(135deg, #15803d 0%, #ca8a04 100%); color: #fff; border-color: transparent; box-shadow: 0 4px 15px rgba(22, 101, 52, 0.25); }
-
-        .admin-hocky-content { display: none; }
-        .admin-hocky-content.active { display: block; }
+        /* Badge nhãn trạng thái Check-in thông minh */
+        .badge-dangky { background-color: #dcfce7; color: #166534; padding: 5px 12px; border-radius: 15px; font-weight: 800; font-size: 12px; border: 1px solid #bbf7d0; display: inline-block; }
+        .badge-vanglai { background-color: #fef9c3; color: #854d0e; padding: 5px 12px; border-radius: 15px; font-weight: 800; font-size: 12px; border: 1px solid #fef08a; display: inline-block; }
     </style>
 </head>
 <body>
@@ -85,8 +82,9 @@
         </div>
 
         <div class="tab-header" id="tabHeaderNav">
-            <button class="tab-btn active" onclick="chuyenTab('tabHoSo')">Xét duyệt hồ sơ danh hiệu</button>
-            <button class="tab-btn" onclick="chuyenTab('tabDiemDanh')">Quản lý điểm danh hoạt động</button>
+            <button class="tab-btn active" onclick="chuyenTab('tabHoSo')">Xét duyệt hồ sơ</button>
+            <button class="tab-btn" onclick="chuyenTab('tabDangKySK')">Danh sách đăng ký sự kiện</button>
+            <button class="tab-btn" onclick="chuyenTab('tabDiemDanh')">Check-in Điểm danh</button>
         </div>
 
         <!-- TAB 1: XÉT DUYỆT HỒ SƠ -->
@@ -99,59 +97,51 @@
             <div class="table-responsive">
                 <table>
                     <thead>
-                        <tr>
-                            <th>STT</th>
-                            <th>Họ tên</th>
-                            <th>MSSV</th>
-                            <th>Lớp</th>
-                            <th>SĐT</th>
-                            <th>Ngành học</th>
-                            <th>Địa chỉ</th>
-                            <th>Email</th>
-                            <th>Chuc vu</th>
-                            <th>Danh hiệu</th>
-                            <th>Minh chứng</th>
-                            <th>Tình hình xét duyệt & Lý do</th>
-                        </tr>
+                        <tr><th>STT</th><th>Họ tên</th><th>MSSV</th><th>Lớp</th><th>SĐT</th><th>Ngành</th><th>Địa chỉ</th><th>Email</th><th>Chức vụ</th><th>Danh hiệu</th><th>Minh chứng</th><th>Xét duyệt</th></tr>
                     </thead>
                     <tbody id="dataList"></tbody>
                 </table>
             </div>
         </div>
 
-        <!-- TAB 2: QUẢN LÝ ĐIỂM DANH (CHECK-IN THÔNG MINH TỪ DANH SÁCH ĐĂNG KÝ) -->
+        <!-- TAB 2: DANH SÁCH ĐĂNG KÝ SỰ KIỆN -->
+        <div id="tabDangKySK" class="tab-content">
+            <h2>Danh sách sinh viên đăng ký giữ chỗ sự kiện</h2>
+            <div class="table-responsive">
+                <table>
+                    <thead><tr><th>STT</th><th>Mã số sinh viên</th><th>Họ và tên</th><th>Lớp</th><th>Sự kiện đăng ký</th><th>Thời gian đăng ký</th></tr></thead>
+                    <tbody id="adminListDangKySK"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB 3: CHECK-IN ĐIỂM DANH (CÓ TÍNH TOÁN VÃNG LAI) -->
         <div id="tabDiemDanh" class="tab-content">
-            <h2>Điểm danh & Quản lý người tham gia sự kiện</h2>
+            <h2>Check-in Điểm danh sự kiện trực tiếp</h2>
             
             <form id="adminDiemDanhForm" class="add-dd-box">
                 <select id="chonHoatDong" required>
-                    <option value="" disabled selected>-- Chọn hoạt động check-in --</option>
-                    <option value="Workshop">Workshop Làm đồ dân gian</option>
-                    <option value="DiemDanh_HK1_HD1">Ngày hội CLB khoa NN</option>
+                    <option value="" disabled selected>-- Chọn sự kiện check-in --</option>
+                    <option value="Workshop Làm đồ dân gian">Workshop Làm đồ dân gian</option>
                 </select>
-                <input type="text" id="adminMssv" placeholder="Nhập MSSV sinh viên đến check-in..." required>
-                <button type="submit" class="add-dd-btn">Check-in Điểm danh</button>
+                <input type="text" id="adminMssv" placeholder="Nhập MSSV (VD: 3123130144)..." required>
+                <button type="submit" class="add-dd-btn">Xác nhận Check-in</button>
             </form>
 
-            <div class="admin-hocky-tabs">
-                <button class="admin-hk-btn active">Danh sách Check-in Workshop</button>
-            </div>
-
-            <div class="admin-hocky-content active">
-                <div class="table-responsive">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>STT</th>
-                                <th>Mã số sinh viên</th>
-                                <th>Họ và tên</th>
-                                <th>Thời gian điểm danh</th>
-                                <th>Thao tác</th>
-                            </tr>
-                        </thead>
-                        <tbody id="adminListWorkshop"></tbody>
-                    </table>
-                </div>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>STT</th>
+                            <th>Mã số sinh viên</th>
+                            <th>Họ và tên</th>
+                            <th>Trạng thái tham gia</th>
+                            <th>Thời gian check-in</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminListCheckinSK"></tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -231,7 +221,7 @@
                                     <option value="Không duyệt" ${data.trang_thai === 'Không duyệt' ? 'selected' : ''}>Không duyệt</option>
                                 </select>
                                 <input type="text" class="reason-input" data-id="${docId}" placeholder="Nhập lý do..." value="${data.ly_do || ''}">
-                                <button class="save-eval-btn" data-id="${docId}">Lưu kết quả</button>
+                                <button class="save-eval-btn" data-id="${docId}">Lưu</button>
                             </div>
                         </td>
                     `;
@@ -248,9 +238,9 @@
                     try {
                         await updateDoc(doc(db, "HoSo_BaoMat", id), { trang_thai: trangThai, ly_do: lyDo });
                         await updateDoc(doc(db, "HoSo_CongKhai", id), { trang_thai: trangThai, ly_do: lyDo });
-                        alert("Đã lưu và đồng bộ thành công!");
+                        alert("Đã lưu thành công!");
                     } catch (error) {
-                        alert("Không thể lưu kết nối.");
+                        alert("Lỗi kết nối.");
                     }
                 });
             });
@@ -258,6 +248,7 @@
 
         function chuyenTab(idTab) {
             document.getElementById('tabHoSo').classList.remove('active');
+            document.getElementById('tabDangKySK').classList.remove('active');
             document.getElementById('tabDiemDanh').classList.remove('active');
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.getElementById(idTab).classList.add('active');
@@ -267,7 +258,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, query, orderBy, doc, updateDoc, addDoc, deleteDoc, getDocs, where } 
+        import { getFirestore, collection, onSnapshot, query, orderBy, doc, updateDoc, setDoc, deleteDoc, getDocs, where } 
         from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -283,81 +274,103 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        const qHoSo = query(collection(db, "HoSo_BaoMat"), orderBy("thoi_gian", "desc"));
-        onSnapshot(qHoSo, (snapshot) => {
-            window.globalAdminSnapshot = snapshot;
-            renderAdminHoSoTable();
+        // Lắng nghe danh sách sinh viên đã đăng ký sự kiện
+        const adminListDangKySK = document.getElementById("adminListDangKySK");
+        onSnapshot(query(collection(db, "DangKy_SuKien"), orderBy("thoi_gian_dk", "desc")), (snapshot) => {
+            adminListDangKySK.innerHTML = "";
+            let stt = 1;
+            snapshot.forEach((docSnap) => {
+                const data = docSnap.data();
+                let thoiGianStr = data.thoi_gian_dk ? data.thoi_gian_dk.toDate().toLocaleTimeString('vi-VN') + " - " + data.thoi_gian_dk.toDate().toLocaleDateString('vi-VN') : "";
+                const tr = document.createElement("tr");
+                tr.innerHTML = `<td><strong>${stt++}</strong></td><td><strong>${data.mssv}</strong></td><td>${data.ho_ten}</td><td>${data.lop}</td><td><span class="status-tag status-da-duyet">${data.su_kien}</span></td><td>${thoiGianStr}</td>`;
+                adminListDangKySK.appendChild(tr);
+            });
         });
 
-        // Xử lý Check-in điểm danh thông minh từ danh sách đăng ký Workshop (Giải pháp 1)
+        // Xử lý Check-in thông minh (Tự tính toán: Đã đăng ký trước vs Khách vãng lai)
         const adminDiemDanhForm = document.getElementById("adminDiemDanhForm");
         adminDiemDanhForm.addEventListener("submit", async (e) => {
             e.preventDefault();
-            const actionType = document.getElementById("chonHoatDong").value;
+            const suKienName = document.getElementById("chonHoatDong").value;
             const mssvInput = document.getElementById("adminMssv").value.trim();
 
-            const mssvRegex = /^312\d{7}$/;
-            if (!mssvRegex.test(mssvInput)) {
+            if (!/^312\d{7}$/.test(mssvInput)) {
                 alert("Mã số sinh viên không hợp lệ! Phải bắt đầu bằng '312' và đúng 10 chữ số.");
                 return;
             }
 
-            if (actionType === "Workshop") {
-                // Kiểm tra xem sinh viên đã đăng ký chưa
-                const regQuery = query(collection(db, "DangKy_Workshop"), where("mssv", "==", mssvInput));
-                const regSnap = await getDocs(regQuery);
-
-                let hoTenSv = "Khách vãng lai";
-                if (!regSnap.empty) {
-                    hoTenSv = regSnap.docs[0].data().ho_ten;
-                } else {
-                    const confirmVangLai = confirm("MSSV này chưa đăng ký trước qua cổng sự kiện. Bạn có muốn cho phép check-in vãng lai không?");
-                    if (!confirmVangLai) return;
-                }
-
-                // Kiểm tra đã check-in chưa
-                const checkQ = query(collection(db, "DiemDanh_Workshop"), where("mssv", "==", mssvInput));
-                const checkSnap = await getDocs(checkQ);
-                if (!checkSnap.empty) {
-                    alert("Sinh viên này đã thực hiện check-in trước đó rồi!");
+            try {
+                // Kiểm tra xem đã check-in chưa
+                const checkQ = query(collection(db, "DiemDanh_SuKien"), where("mssv", "==", mssvInput), where("su_kien", "==", suKienName));
+                if (!(await getDocs(checkQ)).empty) {
+                    alert("Sinh viên này đã check-in sự kiện này rồi!");
                     return;
                 }
 
-                try {
-                    const newRef = doc(collection(db, "DiemDanh_Workshop"));
-                    await setDoc(doc(db, "DiemDanh_Workshop", newRef.id), {
-                        mssv: mssvInput,
-                        ho_ten: hoTenSv,
-                        thoi_gian: new Date()
-                    });
-                    document.getElementById("adminMssv").value = "";
-                    alert(`Check-in thành công cho sinh viên: ${hoTenSv}!`);
-                } catch (err) {
-                    alert("Lỗi kết nối hệ thống.");
+                // Kiểm tra xem sinh viên có đăng ký trước đó hay không
+                const regQ = query(collection(db, "DangKy_SuKien"), where("mssv", "==", mssvInput), where("su_kien", "==", suKienName));
+                const regSnap = await getDocs(regQ);
+
+                let hoTenSv = "Khách vãng lai";
+                let trangThaiThamGia = "Vãng lai (Không đăng ký trước)";
+
+                if (!regSnap.empty) {
+                    hoTenSv = regSnap.docs[0].data().ho_ten;
+                    trangThaiThamGia = "Đã đăng ký trước";
+                } else {
+                    const xacNhan = confirm(`MSSV ${mssvInput} chưa đăng ký giữ chỗ trước. Hệ thống sẽ ghi nhận là KHÁCH VÃNG LAI. Bạn có muốn tiếp tục?`);
+                    if (!xacNhan) return;
                 }
+
+                const newRef = doc(collection(db, "DiemDanh_SuKien"));
+                await setDoc(doc(db, "DiemDanh_SuKien", newRef.id), {
+                    mssv: mssvInput,
+                    ho_ten: hoTenSv,
+                    su_kien: suKienName,
+                    trang_thai: trangThaiThamGia,
+                    thoi_gian: new Date()
+                });
+
+                document.getElementById("adminMssv").value = "";
+                alert(`Check-in thành công cho: ${hoTenSv} (${trangThaiThamGia})!`);
+            } catch (err) {
+                alert("Lỗi kết nối hệ thống.");
             }
         });
 
-        // Lắng nghe bảng check-in Workshop real-time
-        const containerAdminWs = document.getElementById("adminListWorkshop");
-        onSnapshot(query(collection(db, "DiemDanh_Workshop"), orderBy("thoi_gian", "desc")), (snapshot) => {
-            containerAdminWs.innerHTML = "";
+        // Lắng nghe danh sách check-in thực tế hiển thị trên bảng quản trị
+        const adminListCheckinSK = document.getElementById("adminListCheckinSK");
+        onSnapshot(query(collection(db, "DiemDanh_SuKien"), orderBy("thoi_gian", "desc")), (snapshot) => {
+            adminListCheckinSK.innerHTML = "";
             let stt = 1;
             snapshot.forEach((docSnap) => {
                 const data = docSnap.data();
                 const docId = docSnap.id;
                 let thoiGianStr = data.thoi_gian ? data.thoi_gian.toDate().toLocaleTimeString('vi-VN') + " - " + data.thoi_gian.toDate().toLocaleDateString('vi-VN') : "";
+                
+                // Tính toán nhãn hiển thị badge trực quan
+                let badgeHTML = `<span class="badge-dangky">✓ Đã đăng ký trước</span>`;
+                if (data.trang_thai && data.trang_thai.includes("Vãng lai")) {
+                    badgeHTML = `<span class="badge-vanglai">⚡ Vãng lai (Điểm danh trực tiếp)</span>`;
+                }
+
                 const tr = document.createElement("tr");
-                tr.innerHTML = `<td><strong>${stt++}</strong></td><td><strong>${data.mssv}</strong></td><td>${data.ho_ten}</td><td>${thoiGianStr}</td><td><button class="delete-btn" onclick="xoaCheckinWorkshop('${docId}')">Xóa</button></td>`;
-                containerAdminWs.appendChild(tr);
+                tr.innerHTML = `<td><strong>${stt++}</strong></td><td><strong>${data.mssv}</strong></td><td>${data.ho_ten}</td><td>${badgeHTML}</td><td>${thoiGianStr}</td><td><button class="delete-btn" onclick="xoaCheckinSK('${docId}')">Xóa</button></td>`;
+                adminListCheckinSK.appendChild(tr);
             });
         });
 
-        window.xoaCheckinWorkshop = async function(id) {
-            if (confirm("Bạn có chắc muốn xóa lượt điểm danh này?")) {
-                await deleteDoc(doc(db, "DiemDanh_Workshop", id));
+        window.xoaCheckinSK = async function(id) {
+            if (confirm("Bạn có chắc chắn muốn xóa lượt check-in này?")) {
+                await deleteDoc(doc(db, "DiemDanh_SuKien", id));
             }
         }
+
+        onSnapshot(query(collection(db, "HoSo_BaoMat"), orderBy("thoi_gian", "desc")), (snap) => {
+            window.globalAdminSnapshot = snap;
+            renderAdminHoSoTable();
+        });
     </script>
 </body>
 </html>
