@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hệ thống Quản trị | Đoàn - Hội khoa Ngoại ngữ</title>
+    <!-- Thêm thư viện Quagga2 để quét mã vạch / QR qua camera -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 50%, #fefce8 100%); color: #2d3748; padding: 30px; min-height: 100vh; }
@@ -47,6 +49,14 @@
 
         .add-dd-box { background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%); padding: 25px; border-radius: 30px; border: 2px solid #bbf7d0; margin-bottom: 25px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
         .add-dd-box select, .add-dd-box input { flex: 1; min-width: 220px; padding: 14px 22px; border-radius: 20px; border: 2px solid #bbf7d0; outline: none; font-size: 15px; background: #fff; font-weight: 700; color: #1f2937; }
+        
+        /* Container cho phần input MSSV kèm nút quét camera */
+        .input-scan-group { flex: 1; min-width: 260px; display: flex; gap: 8px; align-items: center; }
+        .input-scan-group input { flex: 1; min-width: 140px; margin: 0; }
+
+        .scan-btn { padding: 14px 18px; background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color: #ffffff; border: none; border-radius: 20px; font-weight: 900; cursor: pointer; font-size: 14px; box-shadow: 0 4px 15px rgba(2, 132, 199, 0.3); display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+        .scan-btn:hover { transform: scale(1.03); }
+
         .add-dd-btn { padding: 14px 32px; background: linear-gradient(135deg, #22c55e 0%, #ca8a04 100%); color: #ffffff; border: none; border-radius: 20px; font-weight: 900; cursor: pointer; font-size: 15px; box-shadow: 0 6px 20px rgba(202, 138, 4, 0.4); text-transform: uppercase; }
         .add-dd-btn:hover { transform: scale(1.03); }
         
@@ -64,6 +74,15 @@
         .badge-dangky { background-color: #dcfce7; color: #166534; padding: 5px 12px; border-radius: 15px; font-weight: 800; font-size: 12px; border: 1px solid #bbf7d0; display: inline-block; }
         .badge-vanglai { background-color: #fef9c3; color: #854d0e; padding: 5px 12px; border-radius: 15px; font-weight: 800; font-size: 12px; border: 1px solid #fef08a; display: inline-block; }
         .badge-chuadi { background-color: #f3f4f6; color: #6b7280; padding: 5px 12px; border-radius: 15px; font-weight: 800; font-size: 12px; border: 1px solid #e5e7eb; display: inline-block; }
+
+        /* Modal camera scanner styling */
+        #scannerModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; }
+        .scanner-container { background: #fff; padding: 25px; border-radius: 25px; width: 100%; max-width: 480px; text-align: center; border: 3px solid #bbf7d0; box-shadow: 0 15px 35px rgba(0,0,0,0.3); }
+        .scanner-container h3 { color: #166534; margin-bottom: 15px; font-size: 1.25rem; font-weight: 900; }
+        #interactive.viewport { position: relative; width: 100%; height: 280px; overflow: hidden; border-radius: 15px; border: 2px solid #22c55e; background: #000; margin-bottom: 15px; }
+        #interactive.viewport canvas, #interactive.viewport video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        .close-scanner-btn { padding: 12px 25px; background: #fee2e2; color: #991b1b; border: 2px solid #fecaca; border-radius: 18px; font-weight: 900; cursor: pointer; font-size: 14px; }
+        .close-scanner-btn:hover { background: #fecaca; }
     </style>
 </head>
 <body>
@@ -74,6 +93,15 @@
             <p>Dành cho Đoàn - Hội khoa Ngoại ngữ & Các Câu lạc bộ:<br><strong>CLB Tiếng Anh - EC, CLB Truyền thông - FFL Media, CLB Văn nghệ - MOD, CLB 5 Tốt Đồng hành - FMCC, CLB Cộng tác viên - FFLC</strong></p>
             <input type="password" id="adminPassword" placeholder="Nhập mật khẩu truy cập..." autofocus>
             <button onclick="kiemTraMatKhau()">Đăng nhập</button>
+        </div>
+    </div>
+
+    <!-- Modal giao diện camera quét mã vạch -->
+    <div id="scannerModal">
+        <div class="scanner-container">
+            <h3>Đưa mã vạch MSSV vào khung camera</h3>
+            <div id="interactive" class="viewport"></div>
+            <button class="close-scanner-btn" onclick="dongCamera()">Đóng Camera</button>
         </div>
     </div>
 
@@ -118,13 +146,18 @@
                 <button class="hk-btn" onclick="chuyenHocKyAdmin('hk3', this)">Học kỳ 3 (2026 - 2027)</button>
             </div>
 
-            <!-- Khung thao tác Check-in nhanh -->
+            <!-- Khung thao tác Check-in nhanh kèm nút Quét MSSV -->
             <form id="adminDiemDanhForm" class="add-dd-box">
                 <select id="chonHoatDong" required>
                     <option value="" disabled selected>-- Chọn sự kiện check-in --</option>
                     <option value="Workshop Làm đồ dân gian">Workshop Làm đồ dân gian</option>
                 </select>
-                <input type="text" id="adminMssv" placeholder="Nhập MSSV (VD: 3123130144)..." required>
+                <div class="input-scan-group">
+                    <input type="text" id="adminMssv" placeholder="Nhập MSSV..." required>
+                    <button type="button" class="scan-btn" onclick="batDauQuetCamera()">
+                        📷 Quét MSSV
+                    </button>
+                </div>
                 <button type="submit" class="add-dd-btn">Xác nhận Check-in</button>
             </form>
 
@@ -170,6 +203,7 @@
         let selectedAdminDanhHieu = "Sinh viên 5 Tốt";
         let globalAdminSnapshot = null;
         let currentHkSelected = "hk1";
+        let isScannerRunning = false;
 
         const SU_KIEN_THEO_HK = {
             "hk1": ["Workshop Làm đồ dân gian", "Ngày hội CLB khoa NN", "Lễ đón TSV K26"],
@@ -247,6 +281,51 @@
             document.getElementById("tieuDeBangQuanLy").innerText = `Danh sách: ${e.target.value}`;
             if (typeof window.triggerRender === 'function') window.triggerRender();
         });
+
+        // Tích hợp chức năng Quagga2 Quét Mã vạch / QR qua Camera
+        function batDauQuetCamera() {
+            document.getElementById("scannerModal").style.display = "flex";
+            if (isScannerRunning) return;
+
+            Quagga.init({
+                inputStream: {
+                    name: "Live",
+                    type: "LiveStream",
+                    target: document.querySelector('#interactive'),
+                    constraints: {
+                        facingMode: "environment" // Ưu tiên camera sau
+                    }
+                },
+                decoder: {
+                    readers: ["code_128_reader", "ean_reader", "ean_8_reader", "code_39_reader", "upc_reader"]
+                }
+            }, function(err) {
+                if (err) {
+                    console.error(err);
+                    alert("Không thể khởi động camera hoặc trình duyệt từ chối quyền truy cập!");
+                    dongCamera();
+                    return;
+                }
+                Quagga.start();
+                isScannerRunning = true;
+            });
+
+            Quagga.onDetected(function(result) {
+                const code = result.codeResult.code;
+                if (code) {
+                    document.getElementById("adminMssv").value = code;
+                    dongCamera();
+                }
+            });
+        }
+
+        function dongCamera() {
+            if (isScannerRunning) {
+                Quagga.stop();
+                isScannerRunning = false;
+            }
+            document.getElementById("scannerModal").style.display = "none";
+        }
 
         function renderAdminHoSoTable() {
             if (!globalAdminSnapshot) return;
