@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hệ thống Quản trị | Đoàn - Hội khoa Ngoại ngữ</title>
+    <!-- Thư viện Quagga2 để quét mã vạch / QR qua camera -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -432,7 +433,6 @@
         let checkinDataList = [];
         let currentRenderList = [];
 
-        // Lưu giới hạn dùng chung một collection an toàn hoặc qua doc chuẩn
         window.luuGioiHanSuKien = async function() {
             const selectedSk = document.getElementById("chonHoatDong").value;
             if (!selectedSk) {
@@ -446,9 +446,8 @@
             }
 
             try {
-                // Sử dụng thẳng collection DangKy_SuKien với một document cấu hình đặc biệt hoặc dùng bảng HoSo_BaoMat có sẵn quyền ghi
-                const safeId = "LIMIT_" + selectedSk.replace(/\s+/g, '_');
-                await setDoc(doc(db, "DangKy_SuKien", safeId), {
+                const docId = "CONFIG_LIMIT_" + btoa(unescape(encodeURIComponent(selectedSk))).replace(/=/g, "");
+                await setDoc(doc(db, "DangKy_SuKien", docId), {
                     su_kien: selectedSk,
                     gioi_han_toi_da: parseInt(val),
                     la_cau_hinh: true,
@@ -464,13 +463,15 @@
             }
         }
 
-        // Lắng nghe cấu hình giới hạn an toàn
-        onSnapshot(query(collection(db, "DangKy_SuKien"), where("la_cau_hinh", "==", true)), (snapshot) => {
+        onSnapshot(collection(db, "DangKy_SuKien"), (snapshot) => {
+            regDataList = [];
+            window.danhSachGioiHanSuKien = {};
             snapshot.forEach((docSnap) => {
-                const d = docSnap.data();
-                if (d.su_kien && d.gioi_han_toi_da) {
-                    window.danhSachGioiHanSuKien[d.su_kien] = d.gioi_han_toi_da;
+                const data = docSnap.data();
+                if (data.la_cau_hinh && data.su_kien && data.gioi_han_toi_da) {
+                    window.danhSachGioiHanSuKien[data.su_kien] = data.gioi_han_toi_da;
                 }
+                regDataList.push({ id: docSnap.id, ...data });
             });
             const currentSk = document.getElementById("chonHoatDong").value;
             if (currentSk) capNhatHienThiGioiHan(currentSk);
@@ -610,14 +611,6 @@
             link.click();
             document.body.removeChild(link);
         }
-
-        onSnapshot(query(collection(db, "DangKy_SuKien"), orderBy("thoi_gian_dk", "desc")), (snapshot) => {
-            regDataList = [];
-            snapshot.forEach((docSnap) => {
-                regDataList.push({ id: docSnap.id, ...docSnap.data() });
-            });
-            renderTongHopTable();
-        });
 
         onSnapshot(query(collection(db, "DiemDanh_SuKien"), orderBy("thoi_gian", "desc")), (snapshot) => {
             checkinDataList = [];
