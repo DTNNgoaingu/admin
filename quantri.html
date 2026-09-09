@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hệ thống Quản trị | Đoàn - Hội khoa Ngoại ngữ</title>
-    <!-- Thư viện Quagga2 để quét mã vạch / QR qua camera -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -147,9 +146,11 @@
             </div>
 
             <div class="limit-config-box">
-                <span style="font-weight: 900; color: #854d0e; font-size: 14px;">⚙️ Giới hạn số lượng tối đa:</span>
-                <input type="number" id="inputGioiHanSoLuong" min="1" placeholder="Số lượng...">
-                <button type="button" class="limit-btn" onclick="luuGioiHanSuKien()">Lưu giới hạn</button>
+                <div id="vungCaiDatGioiHan" style="display: flex; gap: 10px; align-items: center;">
+                    <span style="font-weight: 900; color: #854d0e; font-size: 14px;">⚙️ Giới hạn số lượng tối đa:</span>
+                    <input type="number" id="inputGioiHanSoLuong" min="1" placeholder="Số lượng...">
+                    <button type="button" class="limit-btn" onclick="luuGioiHanSuKien()">Lưu giới hạn</button>
+                </div>
                 <span id="thongTinSoLuongHienTai" style="font-size: 13px; font-weight: 700; color: #166534; margin-left: auto;"></span>
             </div>
 
@@ -194,14 +195,14 @@
 
     <script>
         const PHAN_QUYEN = {
-            "bt2026": { ten: "Bí thư Đoàn khoa", quyenHoSo: true, quyenXoa: true, suKienPhuTrach: "ALL" },
-            "lcht2026": { ten: "Liên Chi hội Trưởng Liên Chi hội Sinh viên khoa", quyenHoSo: true, quyenXoa: true, suKienPhuTrach: "ALL" },
-            "admin123": { ten: "Quản trị viên (Admin)", quyenHoSo: true, quyenXoa: false, suKienPhuTrach: "ALL" },
-            "mod2026": { ten: "CLB Văn nghệ - MOD", quyenHoSo: false, quyenXoa: false, suKienPhuTrach: ["Workshop Làm đồ dân gian"] },
-            "ec2026": { ten: "CLB Tiếng Anh - EC", quyenHoSo: false, quyenXoa: false, suKienPhuTrach: ["Ngày hội CLB khoa NN"] },
-            "fflc2026": { ten: "CLB Cộng tác viên - FFLC", quyenHoSo: false, quyenXoa: false, suKienPhuTrach: ["Lễ đón TSV K26"] },
-            "media2026": { ten: "CLB Truyền thông - FFL Media", quyenHoSo: false, quyenXoa: false, suKienPhuTrach: ["Hội thao truyền thống"] },
-            "fmcc2026": { ten: "CLB 5 Tốt Đồng hành - FMCC", quyenHoSo: false, quyenXoa: false, suKienPhuTrach: ["Cuộc thi Hùng biện tiếng Anh"] }
+            "bt2026": { ten: "Bí thư Đoàn khoa", quyenHoSo: true, quyenXoa: true, quyenGioiHan: true, suKienPhuTrach: "ALL" },
+            "lcht2026": { ten: "Liên Chi hội Trưởng Liên Chi hội Sinh viên khoa", quyenHoSo: true, quyenXoa: true, quyenGioiHan: true, suKienPhuTrach: "ALL" },
+            "admin123": { ten: "Quản trị viên (Admin)", quyenHoSo: true, quyenXoa: false, quyenGioiHan: false, suKienPhuTrach: "ALL" },
+            "mod2026": { ten: "CLB Văn nghệ - MOD", quyenHoSo: false, quyenXoa: false, quyenGioiHan: false, suKienPhuTrach: ["Workshop Làm đồ dân gian"] },
+            "ec2026": { ten: "CLB Tiếng Anh - EC", quyenHoSo: false, quyenXoa: false, quyenGioiHan: false, suKienPhuTrach: ["Ngày hội CLB khoa NN"] },
+            "fflc2026": { ten: "CLB Cộng tác viên - FFLC", quyenHoSo: false, quyenXoa: false, quyenGioiHan: false, suKienPhuTrach: ["Lễ đón TSV K26"] },
+            "media2026": { ten: "CLB Truyền thông - FFL Media", quyenHoSo: false, quyenXoa: false, quyenGioiHan: false, suKienPhuTrach: ["Hội thao truyền thống"] },
+            "fmcc2026": { ten: "CLB 5 Tốt Đồng hành - FMCC", quyenHoSo: false, quyenXoa: false, quyenGioiHan: false, suKienPhuTrach: ["Cuộc thi Hùng biện tiếng Anh"] }
         };
 
         let currentRole = null;
@@ -256,6 +257,13 @@
             const val = document.getElementById("adminPassword").value.trim();
             if (PHAN_QUYEN[val]) {
                 currentRole = PHAN_QUYEN[val];
+                
+                if (currentRole.quyenGioiHan) {
+                    document.getElementById("vungCaiDatGioiHan").style.display = "flex";
+                } else {
+                    document.getElementById("vungCaiDatGioiHan").style.display = "none";
+                }
+
                 document.getElementById("loginOverlay").style.display = "none";
                 document.getElementById("adminContainer").style.display = "block";
                 document.getElementById("bannerTitle").innerText = `Hệ thống Quản trị - ${currentRole.ten}`;
@@ -434,6 +442,11 @@
         let currentRenderList = [];
 
         window.luuGioiHanSuKien = async function() {
+            if (!currentRole || !currentRole.quyenGioiHan) {
+                alert("Bạn không có quyền cài đặt giới hạn số lượng cho sự kiện!");
+                return;
+            }
+
             const selectedSk = document.getElementById("chonHoatDong").value;
             if (!selectedSk) {
                 alert("Vui lòng chọn sự kiện trước khi đặt giới hạn!");
