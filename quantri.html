@@ -249,7 +249,7 @@
 
         function capNhatHienThiGioiHan(tenSuKien) {
             const inputVal = document.getElementById("inputGioiHanSoLuong");
-            const limit = danhSachGioiHanSuKien[tenSuKien] || "";
+            const limit = (window.danhSachGioiHanSuKien && window.danhSachGioiHanSuKien[tenSuKien]) || "";
             inputVal.value = limit !== "" ? limit : "";
         }
 
@@ -259,10 +259,14 @@
                 currentRole = PHAN_QUYEN[val];
                 
                 if (currentRole.quyenGioiHan) {
-                    document.getElementById("vungCaiDatGioiHan").style.display = "flex";
+                    document.querySelector(".limit-btn").style.display = "block";
+                    document.getElementById("inputGioiHanSoLuong").removeAttribute("readonly");
                 } else {
-                    document.getElementById("vungCaiDatGioiHan").style.display = "none";
+                    document.querySelector(".limit-btn").style.display = "none";
+                    document.getElementById("inputGioiHanSoLuong").setAttribute("readonly", true);
                 }
+                
+                document.getElementById("vungCaiDatGioiHan").style.display = "flex";
 
                 document.getElementById("loginOverlay").style.display = "none";
                 document.getElementById("adminContainer").style.display = "block";
@@ -270,8 +274,22 @@
 
                 if (!currentRole.quyenHoSo) {
                     document.getElementById("tabHeaderNav").style.display = "none";
+                    
+                    const hocKyTabs = document.querySelector(".hocky-tabs");
+                    if (hocKyTabs) hocKyTabs.style.display = "none";
+                    const textHocKy = document.querySelector("#tabQuanLySK p");
+                    if (textHocKy) textHocKy.style.display = "none";
+
                     chuyenTab('tabQuanLySK');
+                } else {
+                    document.getElementById("tabHeaderNav").style.display = "flex";
+                    
+                    const hocKyTabs = document.querySelector(".hocky-tabs");
+                    if (hocKyTabs) hocKyTabs.style.display = "flex";
+                    const textHocKy = document.querySelector("#tabQuanLySK p");
+                    if (textHocKy) textHocKy.style.display = "block";
                 }
+                
                 capNhatDropdownSuKien();
                 if (typeof window.triggerRender === 'function') window.triggerRender();
             } else {
@@ -410,12 +428,9 @@
             
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.getElementById(idTab).classList.add('active');
-            if (event && event.currentTarget) {
-                event.currentTarget.classList.add('active');
-            } else {
-                const btn = document.querySelector(`button[onclick*="${idTab}"]`);
-                if (btn) btn.classList.add('active');
-            }
+            
+            const btn = document.querySelector(`button[onclick*="${idTab}"]`);
+            if (btn) btn.classList.add('active');
         }
     </script>
 
