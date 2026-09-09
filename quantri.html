@@ -253,7 +253,7 @@
     </div>
 
     <script>
-     const PHAN_QUYEN = {
+        const PHAN_QUYEN = {
             "bt2026": { ten: "Bí thư Đoàn khoa", quyenHoSo: true, quyenXoa: true, quyenGioiHan: true, quyenTaoSuKien: true, suKienPhuTrach: "ALL" },
             "lcht2026": { ten: "Liên Chi hội Trưởng Liên Chi hội Sinh viên khoa", quyenHoSo: true, quyenXoa: true, quyenGioiHan: true, quyenTaoSuKien: true, suKienPhuTrach: "ALL" },
             "admin123": { ten: "Quản trị viên (Admin)", quyenHoSo: true, quyenXoa: false, quyenGioiHan: false, quyenTaoSuKien: false, suKienPhuTrach: "ALL" },
@@ -313,11 +313,7 @@
                 }
                 
                 capNhatDropdownSuKienAdmin();
-                
-                // THÊM DÒNG NÀY ĐỂ ÉP VẼ LẠI BẢNG VÀ HIỆN NÚT XÓA NGAY LẬP TỨC
-                if (typeof renderTongHopTable === 'function') {
-                    renderTongHopTable();
-                }
+                renderTongHopTable();
             } else {
                 alert("Mật khẩu không chính xác!");
                 document.getElementById("adminPassword").value = "";
@@ -765,7 +761,7 @@
                 });
 
                 document.getElementById("adminMssv").value = "";
-                alert(`Check-in thành công: ${hoTenSv} (${trangThaiThamG_ia})!`);
+                alert(`Check-in thành công: ${hoTenSv} (${trangThaiThamGia})!`);
             } catch (err) { alert("Lỗi kết nối."); }
         });
 
