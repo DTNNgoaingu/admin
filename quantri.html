@@ -27,6 +27,8 @@
         .tab-btn.active { background: linear-gradient(135deg, #15803d 0%, #ca8a04 100%); color: #fff; border-color: transparent; box-shadow: 0 6px 20px rgba(22, 101, 52, 0.3); }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
+        
+        .an-giao-dien { display: none !important; }
 
         h2 { color: #166534; margin-bottom: 22px; border-bottom: 4px solid #eab308; display: inline-block; padding-bottom: 6px; font-size: 1.6rem; font-weight: 900; }
         .table-responsive { width: 100%; overflow-x: auto; border-radius: 25px; border: 2px solid #bbf7d0; margin-top: 15px; }
@@ -142,7 +144,7 @@
             </div>
         </div>
 
-        <!-- TAB TẠO SỰ KIỆN MỚI (Dành riêng BT và LCHT) -->
+        <!-- TAB TẠO SỰ KIỆN MỚI (CHỈ HIỂN THỊ VỚI BT VÀ LCHT) -->
         <div id="tabTaoSuKien" class="tab-content">
             <h2>Tạo sự kiện & Phân quyền trực bàn</h2>
             <div class="form-tao-su-kien">
@@ -283,8 +285,8 @@
             if (PHAN_QUYEN[val]) {
                 currentRole = PHAN_QUYEN[val];
                 
-                // Phân quyền tạo sự kiện
-                if (currentRole.quyenTaoSuKien) {
+                // Phân quyền tạo sự kiện (CHỈ BT VÀ LCHT MỚI HIỆN TAB NÀY)
+                if (currentRole.quyenTaoSuKien === true) {
                     document.getElementById("btnTabTaoSk").classList.remove("an-giao-dien");
                 } else {
                     document.getElementById("btnTabTaoSk").classList.add("an-giao-dien");
@@ -343,10 +345,8 @@
             
             let filtered = window.danhSachSuKienToanCuc.filter(sk => {
                 if (currentRole && currentRole.suKienPhuTrach !== "ALL") {
-                    // Nếu là CLB, chỉ lấy sự kiện được gán id
                     return sk.clb_duoc_phan_quyen && sk.clb_duoc_phan_quyen.includes(currentRole.suKienPhuTrachId);
                 }
-                // Nếu là BT, LCHT, Admin, lọc theo học kỳ đang chọn
                 return sk.hoc_ky === currentHkSelected;
             });
 
@@ -467,7 +467,6 @@
                     const trangThai = row.querySelector('.status-select').value;
                     const lyDo = row.querySelector('.reason-input').value;
                     try {
-                        // Gọi updateDoc sau khi module đã khởi tạo
                         if(window.thucHienLuuHoSo) window.thucHienLuuHoSo(id, trangThai, lyDo);
                     } catch (error) { alert("Lỗi lưu."); }
                 });
@@ -493,18 +492,17 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // HÀM LƯU HỒ SƠ
         window.thucHienLuuHoSo = async function(id, trangThai, lyDo) {
             await updateDoc(doc(db, "HoSo_BaoMat", id), { trang_thai: trangThai, ly_do: lyDo });
             await updateDoc(doc(db, "HoSo_CongKhai", id), { trang_thai: trangThai, ly_do: lyDo });
             alert("Đã lưu trạng thái hồ sơ!");
         };
 
-        // 1. TẠO SỰ KIỆN MỚI
+        // 1. TẠO SỰ KIỆN MỚI (CHẶN TUYỆT ĐỐI NẾU KHÔNG PHẢI BT/LCHT)
         const formTaoSk = document.getElementById("formTaoSuKienMoi");
         formTaoSk.addEventListener("submit", async (e) => {
             e.preventDefault();
-            if (!currentRole || !currentRole.quyenTaoSuKien) {
+            if (!currentRole || currentRole.quyenTaoSuKien !== true) {
                 alert("Bạn không có quyền tạo sự kiện!");
                 return;
             }
@@ -689,12 +687,10 @@
                 if (data.hasReg && data.checkinItem) {
                     trangThaiHTML = `<span class="badge-dangky">✓ Đã ĐK & Đã đi</span>`;
                     trangThaiText = "Đã đăng ký & Đã tham gia";
-                    // Quyền xóa check-in hoặc xóa đăng ký
                     thaoTacHTML = duocPhepXoa ? `<button class="delete-btn" onclick="xoaCheckinSK('${data.checkinItem.id}')">Xóa Check-in</button>` : "---";
                 } else if (data.hasReg && !data.checkinItem) {
                     trangThaiHTML = `<span class="badge-chuadi">⏳ Đã ĐK (Chưa đi)</span>`;
                     trangThaiText = "Đã đăng ký (Chưa đi)";
-                    // QUYỀN XÓA ĐĂNG KÝ (Dành cho BT và LCHT để nhả slot)
                     thaoTacHTML = duocPhepXoa ? `<button class="delete-btn" onclick="xoaDangKySK('${data.regId}')" style="background:#fef08a; color:#854d0e; border-color:#eab308;">Xóa ĐK</button>` : "---";
                 } else if (!data.hasReg && data.checkinItem) {
                     trangThaiHTML = `<span class="badge-vanglai">⚡ Khách vãng lai</span>`;
@@ -723,7 +719,6 @@
 
         window.triggerRender = renderTongHopTable;
 
-        // XÓA LƯỢT ĐĂNG KÝ GIỮ CHỖ (NHẢ SLOT TRỐNG)
         window.xoaDangKySK = async function(regId) {
             if (!currentRole || !currentRole.quyenXoa) {
                 alert("Bạn không có quyền xóa lượt đăng ký này!");
@@ -740,7 +735,6 @@
             if (confirm("Xóa lượt check-in này?")) { await deleteDoc(doc(db, "DiemDanh_SuKien", id)); }
         };
 
-        // CHECK-IN THỰC TẾ
         const adminDiemDanhForm = document.getElementById("adminDiemDanhForm");
         adminDiemDanhForm.addEventListener("submit", async (e) => {
             e.preventDefault();
@@ -777,7 +771,6 @@
             } catch (err) { alert("Lỗi kết nối."); }
         });
 
-        // TẢI FILE CSV
         window.taiDanhSachThamGia = function() {
             if (currentRenderList.length === 0) { alert("Chưa có ai tham gia để tải!"); return; }
             let csvContent = "\uFEFFSTT,Mã số sinh viên,Họ và tên,Lớp,Trạng thái tham gia,Thời gian Check-in\n";
