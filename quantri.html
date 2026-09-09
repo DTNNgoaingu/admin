@@ -194,6 +194,8 @@
     </div>
 
     <script>
+        window.danhSachGioiHanSuKien = {}; // Bắt buộc định nghĩa mảng lưu trữ này ở phạm vi toàn cục
+
         const PHAN_QUYEN = {
             "bt2026": { ten: "Bí thư Đoàn khoa", quyenHoSo: true, quyenXoa: true, quyenGioiHan: true, suKienPhuTrach: "ALL" },
             "lcht2026": { ten: "Liên Chi hội Trưởng Liên Chi hội Sinh viên khoa", quyenHoSo: true, quyenXoa: true, quyenGioiHan: true, suKienPhuTrach: "ALL" },
@@ -210,12 +212,18 @@
         let globalAdminSnapshot = null;
         let currentHkSelected = "hk1";
         let isScannerRunning = false;
-        let danhSachGioiHanSuKien = {};
 
         const SU_KIEN_THEO_HK = {
             "hk1": ["Workshop Làm đồ dân gian", "Ngày hội CLB khoa NN", "Lễ đón TSV K26"],
             "hk2": ["Hội thao truyền thống", "Cuộc thi Hùng biện tiếng Anh"],
             "hk3": ["Tổng kết chiến dịch Mùa hè xanh", "Đêm hội văn nghệ khoa"]
+        };
+
+        window.capNhatHienThiGioiHan = function(tenSuKien) {
+            const inputVal = document.getElementById("inputGioiHanSoLuong");
+            if (!inputVal) return;
+            const limit = (window.danhSachGioiHanSuKien && window.danhSachGioiHanSuKien[tenSuKien]) || "";
+            inputVal.value = limit !== "" ? limit : "";
         };
 
         function capNhatDropdownSuKien() {
@@ -239,18 +247,12 @@
             if (danhSachHienThi.length > 0) {
                 selectSk.value = danhSachHienThi[0];
                 document.getElementById("tieuDeBangQuanLy").innerText = `Danh sách: ${danhSachHienThi[0]}`;
-                capNhatHienThiGioiHan(danhSachHienThi[0]);
+                window.capNhatHienThiGioiHan(danhSachHienThi[0]);
             } else {
                 document.getElementById("tieuDeBangQuanLy").innerText = `Danh sách: (Không có sự kiện được phân quyền ở học kỳ này)`;
                 document.getElementById("inputGioiHanSoLuong").value = "";
                 document.getElementById("thongTinSoLuongHienTai").innerText = "";
             }
-        }
-
-        function capNhatHienThiGioiHan(tenSuKien) {
-            const inputVal = document.getElementById("inputGioiHanSoLuong");
-            const limit = (window.danhSachGioiHanSuKien && window.danhSachGioiHanSuKien[tenSuKien]) || "";
-            inputVal.value = limit !== "" ? limit : "";
         }
 
         function kiemTraMatKhau() {
@@ -325,7 +327,7 @@
         document.getElementById("chonHoatDong").addEventListener("change", function(e) {
             const skName = e.target.value;
             document.getElementById("tieuDeBangQuanLy").innerText = `Danh sách: ${skName}`;
-            capNhatHienThiGioiHan(skName);
+            window.capNhatHienThiGioiHan(skName);
             if (typeof window.triggerRender === 'function') window.triggerRender();
         });
 
@@ -478,7 +480,9 @@
             }
 
             try {
-                const docId = "CONFIG_LIMIT_" + btoa(unescape(encodeURIComponent(selectedSk))).replace(/=/g, "");
+                // Tạo ID an toàn, loại bỏ dấu cách để tránh sinh ra nhiều tài liệu rác do lỗi khoảng trắng
+                const docId = "CONFIG_LIMIT_" + selectedSk.replace(/\s+/g, '_');
+                
                 await setDoc(doc(db, "DangKy_SuKien", docId), {
                     su_kien: selectedSk,
                     gioi_han_toi_da: parseInt(val),
@@ -486,9 +490,7 @@
                     thoi_gian: new Date()
                 }, { merge: true });
 
-                window.danhSachGioiHanSuKien[selectedSk] = parseInt(val);
                 alert(`Đã đặt giới hạn tối đa ${val} sinh viên cho sự kiện "${selectedSk}" thành công!`);
-                renderTongHopTable();
             } catch (err) {
                 console.error(err);
                 alert("Lỗi khi lưu giới hạn lên hệ thống.");
@@ -497,16 +499,32 @@
 
         onSnapshot(collection(db, "DangKy_SuKien"), (snapshot) => {
             regDataList = [];
-            window.danhSachGioiHanSuKien = {};
+            
+            let tempLimits = {};
+            let tempLimitsTime = {}; // Theo dõi thời gian để chỉ lấy tài liệu lưu gần nhất
+
             snapshot.forEach((docSnap) => {
                 const data = docSnap.data();
+                
+                // Lọc bỏ các tài liệu rác cũ bị lưu trùng, chỉ lấy tài liệu cập nhật sau cùng
                 if (data.la_cau_hinh && data.su_kien && data.gioi_han_toi_da) {
-                    window.danhSachGioiHanSuKien[data.su_kien] = data.gioi_han_toi_da;
+                    let docTime = data.thoi_gian ? data.thoi_gian.toMillis() : 0;
+                    if (!tempLimits[data.su_kien] || docTime > (tempLimitsTime[data.su_kien] || 0)) {
+                        tempLimits[data.su_kien] = data.gioi_han_toi_da;
+                        tempLimitsTime[data.su_kien] = docTime;
+                    }
                 }
+                
                 regDataList.push({ id: docSnap.id, ...data });
             });
+            
+            // Cập nhật lên biến toàn cục
+            window.danhSachGioiHanSuKien = tempLimits;
+
             const currentSk = document.getElementById("chonHoatDong").value;
-            if (currentSk) capNhatHienThiGioiHan(currentSk);
+            if (currentSk) {
+                window.capNhatHienThiGioiHan(currentSk);
+            }
             renderTongHopTable();
         });
 
@@ -525,6 +543,7 @@
 
             const maxLimit = window.danhSachGioiHanSuKien ? window.danhSachGioiHanSuKien[selectedSk] : null;
             const infoText = document.getElementById("thongTinSoLuongHienTai");
+            
             if (infoText) {
                 if (maxLimit) {
                     infoText.innerText = `Đã đăng ký: ${hkRegs.length} | Đã check-in: ${hkCheckins.length} / ${maxLimit}`;
