@@ -257,11 +257,11 @@
             "bt2026": { ten: "Bí thư Đoàn khoa", quyenHoSo: true, quyenXoa: true, quyenGioiHan: true, quyenTaoSuKien: true, suKienPhuTrach: "ALL" },
             "lcht2026": { ten: "Liên Chi hội Trưởng Liên Chi hội Sinh viên khoa", quyenHoSo: true, quyenXoa: true, quyenGioiHan: true, quyenTaoSuKien: true, suKienPhuTrach: "ALL" },
             "admin123": { ten: "Quản trị viên (Admin)", quyenHoSo: true, quyenXoa: false, quyenGioiHan: false, quyenTaoSuKien: false, suKienPhuTrach: "ALL" },
-            "mod2026": { ten: "CLB Văn nghệ - MOD", quyenHoSo: false, quyenXoa: true, quyenGioiHan: false, quyenTaoSuKien: false, suKienPhuTrachId: "mod2026" },
-            "ec2026": { ten: "CLB Tiếng Anh - EC", quyenHoSo: false, quyenXoa: true, quyenGioiHan: false, quyenTaoSuKien: false, suKienPhuTrachId: "ec2026" },
-            "fflc2026": { ten: "CLB Cộng tác viên - FFLC", quyenHoSo: false, quyenXoa: true, quyenGioiHan: false, quyenTaoSuKien: false, suKienPhuTrachId: "fflc2026" },
-            "media2026": { ten: "CLB Truyền thông - FFL Media", quyenHoSo: false, quyenXoa: true, quyenGioiHan: false, quyenTaoSuKien: false, suKienPhuTrachId: "media2026" },
-            "fmcc2026": { ten: "CLB 5 Tốt Đồng hành - FMCC", quyenHoSo: false, quyenXoa: true, quyenGioiHan: false, quyenTaoSuKien: false, suKienPhuTrachId: "fmcc2026" }
+            "mod2026": { ten: "CLB Văn nghệ - MOD", quyenHoSo: false, quyenXoa: false, quyenGioiHan: false, quyenTaoSuKien: false, suKienPhuTrachId: "mod2026" },
+            "ec2026": { ten: "CLB Tiếng Anh - EC", quyenHoSo: false, quyenXoa: false, quyenGioiHan: false, quyenTaoSuKien: false, suKienPhuTrachId: "ec2026" },
+            "fflc2026": { ten: "CLB Cộng tác viên - FFLC", quyenHoSo: false, quyenXoa: false, quyenGioiHan: false, quyenTaoSuKien: false, suKienPhuTrachId: "fflc2026" },
+            "media2026": { ten: "CLB Truyền thông - FFL Media", quyenHoSo: false, quyenXoa: false, quyenGioiHan: false, quyenTaoSuKien: false, suKienPhuTrachId: "media2026" },
+            "fmcc2026": { ten: "CLB 5 Tốt Đồng hành - FMCC", quyenHoSo: false, quyenXoa: false, quyenGioiHan: false, quyenTaoSuKien: false, suKienPhuTrachId: "fmcc2026" }
         };
 
         let currentRole = null;
@@ -342,7 +342,7 @@
             selectSk.innerHTML = `<option value="" disabled selected>-- Chọn sự kiện check-in --</option>`;
             
             let filtered = window.danhSachSuKienToanCuc.filter(sk => {
-                if (currentRole && currentRole.suKienPhuTrach !== "ALL") {
+                if (currentRole && currentRole.suKienPhuTrachId) {
                     return sk.clb_duoc_phan_quyen && sk.clb_duoc_phan_quyen.includes(currentRole.suKienPhuTrachId);
                 }
                 return sk.hoc_ky === currentHkSelected;
