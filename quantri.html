@@ -314,6 +314,11 @@
                 
                 capNhatDropdownSuKienAdmin();
                 renderTongHopTable();
+                
+                // Kích hoạt lại việc render danh sách sự kiện khi vừa đăng nhập xong
+                if (window.danhSachSuKienSnapshotCache) {
+                    xuLyRenderDanhSachSuKien(window.danhSachSuKienSnapshotCache);
+                }
             } else {
                 alert("Mật khẩu không chính xác!");
                 document.getElementById("adminPassword").value = "";
@@ -533,7 +538,10 @@
             }
         });
 
-        onSnapshot(query(collection(db, "DanhSach_SuKien"), orderBy("thoi_gian_tao", "desc")), (snapshot) => {
+        window.danhSachSuKienSnapshotCache = null;
+
+        function xuLyRenderDanhSachSuKien(snapshot) {
+            window.danhSachSuKienSnapshotCache = snapshot;
             window.danhSachSuKienToanCuc = [];
             const tableList = document.getElementById("listSuKienDaTao");
             if (tableList) tableList.innerHTML = "";
@@ -544,7 +552,7 @@
                 window.danhSachSuKienToanCuc.push({ id: docSnap.id, ...data });
 
                 if (tableList) {
-                    const duocPhepXoa = currentRole && (currentRole.quyenXoa === true || currentRole.suKienPhuTrach === "ALL");
+                    const duocPhepXoa = currentRole !== null;
                     const tr = document.createElement("tr");
                     tr.innerHTML = `
                         <td><strong>${stt++}</strong></td>
@@ -559,11 +567,15 @@
             });
 
             if (typeof capNhatDropdownSuKienAdmin === 'function') capNhatDropdownSuKienAdmin();
+        }
+
+        onSnapshot(query(collection(db, "DanhSach_SuKien"), orderBy("thoi_gian_tao", "desc")), (snapshot) => {
+            xuLyRenderDanhSachSuKien(snapshot);
         });
 
         window.xoaSuKien = async function(docId) {
-            if (!currentRole || (!currentRole.quyenXoa && currentRole.suKienPhuTrach !== "ALL")) {
-                alert("Bạn không có quyền xóa sự kiện!");
+            if (!currentRole) {
+                alert("Bạn chưa đăng nhập hoặc không có quyền xóa sự kiện!");
                 return;
             }
             if (confirm("Cảnh báo: Xóa sự kiện sẽ ẩn sự kiện này khỏi cổng sinh viên. Bạn có chắc chắn?")) {
@@ -650,15 +662,21 @@
             }
 
             const mssvMap = new Map();
-            hkRegs.forEach(item => {
-                mssvMap.set(item.mssv, { mssv: item.mssv, ho_ten: item.ho_ten, lop: item.lop, thoi_gian_dk: item.thoi_gian_dk, regId: item.id, hasReg: true, checkinItem: null });
+            
+            hkCheckins.forEach(item => {
+                mssvMap.set(item.mssv, { mssv: item.mssv, ho_ten: item.ho_ten || "Khách vãng lai", lop: "---", thoi_gian_dk: null, regId: null, hasReg: false, checkinItem: item });
             });
 
-            hkCheckins.forEach(item => {
+            hkRegs.forEach(item => {
                 if (mssvMap.has(item.mssv)) {
-                    mssvMap.get(item.mssv).checkinItem = item;
+                    let existing = mssvMap.get(item.mssv);
+                    existing.ho_ten = item.ho_ten;
+                    existing.lop = item.lop;
+                    existing.thoi_gian_dk = item.thoi_gian_dk;
+                    existing.regId = item.id;
+                    existing.hasReg = true;
                 } else {
-                    mssvMap.set(item.mssv, { mssv: item.mssv, ho_ten: item.ho_ten, lop: "---", thoi_gian_dk: null, regId: null, hasReg: false, checkinItem: item });
+                    mssvMap.set(item.mssv, { mssv: item.mssv, ho_ten: item.ho_ten, lop: item.lop, thoi_gian_dk: item.thoi_gian_dk, regId: item.id, hasReg: true, checkinItem: null });
                 }
             });
 
@@ -714,7 +732,7 @@
         window.triggerRender = renderTongHopTable;
 
         window.xoaDangKySK = async function(regId) {
-            if (!currentRole || (!currentRole.quyenXoa && currentRole.suKienPhuTrach !== "ALL")) {
+            if (!currentRole) {
                 alert("Bạn không có quyền xóa lượt đăng ký này!");
                 return;
             }
@@ -725,7 +743,7 @@
         };
 
         window.xoaCheckinSK = async function(id) {
-            if (!currentRole || (!currentRole.quyenXoa && currentRole.suKienPhuTrach !== "ALL")) { alert("Không có quyền xóa!"); return; }
+            if (!currentRole) { alert("Không có quyền xóa!"); return; }
             if (confirm("Xóa lượt check-in này?")) { await deleteDoc(doc(db, "DiemDanh_SuKien", id)); }
         };
 
