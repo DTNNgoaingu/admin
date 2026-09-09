@@ -544,7 +544,7 @@
                 window.danhSachSuKienToanCuc.push({ id: docSnap.id, ...data });
 
                 if (tableList) {
-                    const duocPhepXoa = currentRole && currentRole.quyenXoa === true;
+                    const duocPhepXoa = currentRole && (currentRole.quyenXoa === true || currentRole.suKienPhuTrach === "ALL");
                     const tr = document.createElement("tr");
                     tr.innerHTML = `
                         <td><strong>${stt++}</strong></td>
@@ -562,7 +562,7 @@
         });
 
         window.xoaSuKien = async function(docId) {
-            if (!currentRole || !currentRole.quyenXoa) {
+            if (!currentRole || (!currentRole.quyenXoa && currentRole.suKienPhuTrach !== "ALL")) {
                 alert("Bạn không có quyền xóa sự kiện!");
                 return;
             }
@@ -676,7 +676,7 @@
                 let trangThaiHTML = "";
                 let thaoTacHTML = "---";
                 let trangThaiText = "";
-                const duocPhepXoa = currentRole && currentRole.quyenXoa === true;
+                const duocPhepXoa = currentRole && (currentRole.quyenXoa === true || currentRole.suKienPhuTrach === "ALL");
 
                 if (data.hasReg && data.checkinItem) {
                     trangThaiHTML = `<span class="badge-dangky">✓ Đã ĐK & Đã đi</span>`;
@@ -714,7 +714,7 @@
         window.triggerRender = renderTongHopTable;
 
         window.xoaDangKySK = async function(regId) {
-            if (!currentRole || !currentRole.quyenXoa) {
+            if (!currentRole || (!currentRole.quyenXoa && currentRole.suKienPhuTrach !== "ALL")) {
                 alert("Bạn không có quyền xóa lượt đăng ký này!");
                 return;
             }
@@ -725,7 +725,7 @@
         };
 
         window.xoaCheckinSK = async function(id) {
-            if (!currentRole || !currentRole.quyenXoa) { alert("Không có quyền xóa!"); return; }
+            if (!currentRole || (!currentRole.quyenXoa && currentRole.suKienPhuTrach !== "ALL")) { alert("Không có quyền xóa!"); return; }
             if (confirm("Xóa lượt check-in này?")) { await deleteDoc(doc(db, "DiemDanh_SuKien", id)); }
         };
 
