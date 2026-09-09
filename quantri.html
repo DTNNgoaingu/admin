@@ -676,7 +676,7 @@
                 let trangThaiHTML = "";
                 let thaoTacHTML = "---";
                 let trangThaiText = "";
-                const duocPhepXoa = currentRole && (currentRole.quyenXoa === true || currentRole.suKienPhuTrach === "ALL");
+                const duocPhepXoa = currentRole !== null;
 
                 if (data.hasReg && data.checkinItem) {
                     trangThaiHTML = `<span class="badge-dangky">✓ Đã ĐK & Đã đi</span>`;
