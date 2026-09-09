@@ -260,10 +260,14 @@
                 
                 if (currentRole.quyenGioiHan) {
                     document.querySelector(".limit-btn").style.display = "block";
-                    document.getElementById("inputGioiHanSoLuong").removeAttribute("readonly");
+                    document.getElementById("inputGioiHanSoLuong").removeAttribute("disabled");
+                    document.getElementById("inputGioiHanSoLuong").style.background = "#fff";
+                    document.getElementById("inputGioiHanSoLuong").style.cursor = "text";
                 } else {
                     document.querySelector(".limit-btn").style.display = "none";
-                    document.getElementById("inputGioiHanSoLuong").setAttribute("readonly", true);
+                    document.getElementById("inputGioiHanSoLuong").setAttribute("disabled", "true");
+                    document.getElementById("inputGioiHanSoLuong").style.background = "#e5e7eb"; 
+                    document.getElementById("inputGioiHanSoLuong").style.cursor = "not-allowed";
                 }
                 
                 document.getElementById("vungCaiDatGioiHan").style.display = "flex";
